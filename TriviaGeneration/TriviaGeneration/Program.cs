@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -12,15 +13,39 @@ namespace TriviaGeneration
 {
     class Program
     {
-        static string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\SachinCode.txt";
-
         static void Main(string[] args)
         {
-            string url = @"http://en.wikipedia.org/wiki/Sachin_Tendulkar";
-            string text = getText(url);
-            System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);
-            textFile.Write(text);
-            textFile.Close();
+            List<string> urls = new List<string>();
+            urls.Add(@"http://en.wikipedia.org/wiki/Sachin_Tendulkar");
+            urls.Add(@"http://en.wikipedia.org/wiki/Virender_Sehwag");
+            urls.Add(@"http://en.wikipedia.org/wiki/Sourav_Ganguly");
+            urls.Add(@"http://en.wikipedia.org/wiki/Rahul_Dravid");
+            urls.Add(@"http://en.wikipedia.org/wiki/Mahendra_Singh_Dhoni");
+            urls.Add(@"http://en.wikipedia.org/wiki/V._V._S._Laxman");
+            urls.Add(@"http://en.wikipedia.org/wiki/Yuvraj_Singh");
+            urls.Add(@"http://en.wikipedia.org/wiki/Virat_Kohli");
+            urls.Add(@"http://en.wikipedia.org/wiki/Gautam_Gambhir");
+            urls.Add(@"http://en.wikipedia.org/wiki/Suresh_Raina");
+            urls.Add(@"http://en.wikipedia.org/wiki/Irfan_Pathan");
+
+            generateTextFile(urls);
+        }
+
+        static void generateTextFile(List<string> urls)
+        {
+            foreach (string url in urls)
+            {
+                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\" + url.Remove(0, 29) + ".txt";
+
+                if (File.Exists(fileName))
+                    continue;
+
+                string text = getText(url);
+                System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);
+                textFile.Write(text);
+                textFile.Close();
+                Console.WriteLine("done: " + url);
+            }
         }
 
         static string getText(string url)

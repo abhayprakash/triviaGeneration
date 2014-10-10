@@ -35,6 +35,16 @@ namespace TriviaGeneration
                 text += row.InnerText + " ";
             }
 
+            string pattern = "citation needed";
+            string replacement = "0";
+            Regex rgx1 = new Regex(pattern);
+            text = rgx1.Replace(text, replacement);
+
+            pattern = "[[0-9]*]";
+            replacement = "";
+            Regex rgx = new Regex(pattern);
+            text = rgx.Replace(text, replacement);
+
             return text;
         }
     }

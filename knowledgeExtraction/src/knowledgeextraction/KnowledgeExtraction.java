@@ -36,6 +36,8 @@ public class KnowledgeExtraction {
     static String naiveFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\naive";
     static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\imd";
     
+    static double CONST_K = 0.33;
+    
     static List<String> Entities = new ArrayList<String>();
     static HashMap<String, HashMap<String, List<String> > > EntityToAttributeToSentenceList = new HashMap<>();
     static HashMap<String, List<String> > AttributeToEntityList = new HashMap<>();
@@ -45,7 +47,15 @@ public class KnowledgeExtraction {
         Entities.add("Sourav_Ganguly");
         Entities.add("Rahul_Dravid");
         Entities.add("Virender_Sehwag");
-        
+        Entities.add("Mahendra_Singh_Dhoni");
+        Entities.add("V._V._S._Laxman");
+        Entities.add("Yuvraj_Singh");
+        Entities.add("Virat_Kohli");
+        Entities.add("Gautam_Gambhir");
+        Entities.add("Suresh_Raina");
+        Entities.add("Irfan_Pathan");
+        Entities.add("Mohammad_Azharuddin");
+                
         BuildEntityAttributeGraph();
         
         String targetEntity = Entities.get(0);
@@ -64,7 +74,7 @@ public class KnowledgeExtraction {
         List<String> facts = new ArrayList<>();
         facts.add("Target Entity has these but not others ------------------------------------------------------");
         for(String attribute: EntityToAttributeToSentenceList.get(targetEntity).keySet()){
-            if(AttributeToEntityList.get(attribute).size() <= Entities.size()/3){
+            if(AttributeToEntityList.get(attribute).size() <= Entities.size() * CONST_K){
                 facts.addAll(getSentences(targetEntity, attribute));
             }
         }
@@ -72,7 +82,7 @@ public class KnowledgeExtraction {
         facts.add("Target Entity does not has these but not others have ------------------------------------------------------");
         for(String attribute: AttributeToEntityList.keySet()){
             if(EntityToAttributeToSentenceList.get(targetEntity).keySet().contains(attribute) == false){
-                if(AttributeToEntityList.get(attribute).size() >= (2*Entities.size())/3){
+                if(AttributeToEntityList.get(attribute).size() >= ((1.0-CONST_K) * Entities.size()){
                     facts.add(attribute);
                 }
             }

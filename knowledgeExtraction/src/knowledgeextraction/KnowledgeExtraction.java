@@ -13,9 +13,14 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,11 +37,12 @@ public class KnowledgeExtraction {
      * @param args the command line arguments
      */
     static String filePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\";
-    static String resultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\result";
-    static String naiveFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\naive";
-    static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\imd";
+    static String resultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\result";
+    static String naiveFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\naive";
+    static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\imd";
+    static String modelFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\modelFile.txt";
     
-    static double CONST_K = 0.33;
+    static double CONST_K = 0.1;
     
     static List<String> Entities = new ArrayList<String>();
     static HashMap<String, HashMap<String, List<String> > > EntityToAttributeToSentenceList = new HashMap<>();
@@ -55,8 +61,8 @@ public class KnowledgeExtraction {
         Entities.add("Suresh_Raina");
         Entities.add("Irfan_Pathan");
         Entities.add("Mohammad_Azharuddin");
-                
-        BuildEntityAttributeGraph();
+        
+        GetEntityAttributeGraph();
         
         String targetEntity = Entities.get(0);
         
@@ -67,6 +73,35 @@ public class KnowledgeExtraction {
             writer.write(s+"\n");
         }
         writer.close();
+    }
+    
+    static void GetEntityAttributeGraph() throws IOException {
+        File objectFile = new File(modelFile);
+        
+        if(!objectFile.exists()){
+            System.out.println("new model being generated");
+            BuildEntityAttributeGraph();
+
+            FileOutputStream fos = new FileOutputStream(modelFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(EntityToAttributeToSentenceList);
+            oos.writeObject(AttributeToEntityList);
+            oos.close();
+            fos.close();
+        }
+        else{
+            System.out.println("Loading earlier model . . .");
+            try{
+                FileInputStream fis = new FileInputStream(modelFile);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                EntityToAttributeToSentenceList = (HashMap<String, HashMap<String, List<String> > >) ois.readObject();
+                AttributeToEntityList = (HashMap<String, List<String> >) ois.readObject();
+                ois.close();
+                fis.close();
+            } catch (IOException e) {            
+            } catch (ClassNotFoundException e) {            
+            }
+        }
     }
     
     static List<String> GenerateAndReturnInterestingFacts(String targetEntity){
@@ -82,7 +117,7 @@ public class KnowledgeExtraction {
         facts.add("Target Entity does not has these but not others have ------------------------------------------------------");
         for(String attribute: AttributeToEntityList.keySet()){
             if(EntityToAttributeToSentenceList.get(targetEntity).keySet().contains(attribute) == false){
-                if(AttributeToEntityList.get(attribute).size() >= ((1.0-CONST_K) * Entities.size()){
+                if(AttributeToEntityList.get(attribute).size() >= (Entities.size() * (1.0-CONST_K))){
                     facts.add(attribute);
                 }
             }
@@ -107,7 +142,7 @@ public class KnowledgeExtraction {
         {
             System.out.println("Building entity attribute graph for " + name);
             BufferedReader reader = new BufferedReader(new FileReader(filePath + name + ".txt"));
-            BufferedWriter NaiveWriter = new BufferedWriter(new FileWriter(naiveFile+ name + ".txt"));
+            //BufferedWriter NaiveWriter = new BufferedWriter(new FileWriter(naiveFile+ name + ".txt"));
             //BufferedWriter wrimd = new BufferedWriter(new FileWriter(imdFile+ name + ".txt"));
             
             if(EntityToAttributeToSentenceList.containsKey(name) == false)
@@ -124,12 +159,12 @@ public class KnowledgeExtraction {
                     String lemmatizedWord = token.get(CoreAnnotations.LemmaAnnotation.class);
                     String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
                     String word = token.get(CoreAnnotations.TextAnnotation.class);
-                    
+                    /*
                     if(pos.equals("RBS") || pos.equals("JJS") || word.equals("only"))
                     {
                         NaiveWriter.write(sentence+"\n");
                     }
-
+                    */
                     if(pos.contains("VB"))
                     {
                         if(EntityToAttributeToSentenceList.get(name).containsKey(lemmatizedWord) == false)
@@ -145,7 +180,7 @@ public class KnowledgeExtraction {
                     }
                 }
             }
-            NaiveWriter.close();
+            //NaiveWriter.close();
             //wrimd.close();
             reader.close();
         }

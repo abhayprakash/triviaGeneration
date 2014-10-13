@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ public class KnowledgeExtraction {
     static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\imd";
     static String modelFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\modelFile.txt";
     
+    static Boolean forceTrain = false;
     static double CONST_K = 0.1;
     
     static List<String> Entities = new ArrayList<String>();
@@ -64,13 +66,18 @@ public class KnowledgeExtraction {
         
         GetEntityAttributeGraph();
         
-        String targetEntity = Entities.get(0);
+        String targetEntity = Entities.get(2);
         
         List<String> interestingFacts = GenerateAndReturnInterestingFacts(targetEntity);
         
-        BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile+ targetEntity + ".txt"));
+        PrintWriter writer = new PrintWriter(resultFile + targetEntity + ".txt", "UTF-8");
+        //BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile+ targetEntity + ".txt"));
+        HashMap<String, Boolean> appeared = new HashMap<>();
         for(String s: interestingFacts){
-            writer.write(s+"\n");
+            if(!appeared.containsKey(s)){
+                writer.println(s);
+                appeared.put(s, true);
+            }
         }
         writer.close();
     }
@@ -78,7 +85,7 @@ public class KnowledgeExtraction {
     static void GetEntityAttributeGraph() throws IOException {
         File objectFile = new File(modelFile);
         
-        if(!objectFile.exists()){
+        if(forceTrain || !objectFile.exists()){
             System.out.println("new model being generated");
             BuildEntityAttributeGraph();
 
@@ -104,17 +111,21 @@ public class KnowledgeExtraction {
         }
     }
     
-    static List<String> GenerateAndReturnInterestingFacts(String targetEntity){
+    static List<String> GenerateAndReturnInterestingFacts(String targetEntity) throws IOException {
         System.out.println("Generating facts");
         List<String> facts = new ArrayList<>();
+        
         facts.add("Target Entity has these but not others ------------------------------------------------------");
+        facts.add(" ");
         for(String attribute: EntityToAttributeToSentenceList.get(targetEntity).keySet()){
             if(AttributeToEntityList.get(attribute).size() <= Entities.size() * CONST_K){
                 facts.addAll(getSentences(targetEntity, attribute));
             }
         }
-        
-        facts.add("Target Entity does not has these but not others have ------------------------------------------------------");
+        facts.add("  ");
+        facts.add("   ");
+        facts.add("Target Entity does not has these but others have ------------------------------------------------------");
+        facts.add("    ");
         for(String attribute: AttributeToEntityList.keySet()){
             if(EntityToAttributeToSentenceList.get(targetEntity).keySet().contains(attribute) == false){
                 if(AttributeToEntityList.get(attribute).size() >= (Entities.size() * (1.0-CONST_K))){
@@ -122,6 +133,18 @@ public class KnowledgeExtraction {
                 }
             }
         }
+        facts.add("     ");
+        facts.add("      ");
+        facts.add("Based on Superlative Adjectives and adverbs -------------------------------------------------");
+        facts.add("       ");
+        BufferedReader reader = new BufferedReader(new FileReader(naiveFile + targetEntity + ".txt"));
+        String naiveFacts;
+        while((naiveFacts = reader.readLine()) != null)
+        {
+            facts.add(naiveFacts);
+        }
+        reader.close();
+        
         System.out.println("Generating facts : done");
         return facts;
     }

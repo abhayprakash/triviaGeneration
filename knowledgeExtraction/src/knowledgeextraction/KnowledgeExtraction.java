@@ -16,7 +16,10 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -28,53 +31,113 @@ public class KnowledgeExtraction {
     /**
      * @param args the command line arguments
      */
-    static String filePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\Sachin_Tendulkar.txt";
-    static String resultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\result.txt";
-    static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\imd.txt";
+    static String filePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\";
+    static String resultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\result";
+    static String naiveFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\naive";
+    static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\imd";
+    
+    static List<String> Entities = new ArrayList<String>();
+    static HashMap<String, HashMap<String, List<String> > > EntityToAttributeToSentenceList = new HashMap<>();
+    static HashMap<String, List<String> > AttributeToEntityList = new HashMap<>();
     
     public static void main(String[] args) throws IOException {
-        // creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution 
+        Entities.add("Sachin_Tendulkar");
+        Entities.add("Sourav_Ganguly");
+        Entities.add("Rahul_Dravid");
+        Entities.add("Virender_Sehwag");
+        
+        BuildEntityAttributeGraph();
+        
+        String targetEntity = Entities.get(0);
+        
+        List<String> interestingFacts = GenerateAndReturnInterestingFacts(targetEntity);
+        
+        BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile+ targetEntity + ".txt"));
+        for(String s: interestingFacts){
+            writer.write(s+"\n");
+        }
+        writer.close();
+    }
+    
+    static List<String> GenerateAndReturnInterestingFacts(String targetEntity){
+        System.out.println("Generating facts");
+        List<String> facts = new ArrayList<>();
+        facts.add("Target Entity has these but not others ------------------------------------------------------");
+        for(String attribute: EntityToAttributeToSentenceList.get(targetEntity).keySet()){
+            if(AttributeToEntityList.get(attribute).size() <= Entities.size()/3){
+                facts.addAll(getSentences(targetEntity, attribute));
+            }
+        }
+        
+        facts.add("Target Entity does not has these but not others have ------------------------------------------------------");
+        for(String attribute: AttributeToEntityList.keySet()){
+            if(EntityToAttributeToSentenceList.get(targetEntity).keySet().contains(attribute) == false){
+                if(AttributeToEntityList.get(attribute).size() >= (2*Entities.size())/3){
+                    facts.add(attribute);
+                }
+            }
+        }
+        System.out.println("Generating facts : done");
+        return facts;
+    }
+    
+    static List<String> getSentences(String entity, String attribute){
+        System.out.println("getting sentences");
+        List<String> sentences = EntityToAttributeToSentenceList.get(entity).get(attribute);
+        return sentences;
+    }
+    
+    static void BuildEntityAttributeGraph() throws IOException {
+        System.out.println("Building entity attribute graph");
         Properties props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile));
-        BufferedWriter wrimd = new BufferedWriter(new FileWriter(imdFile));
-        
-        String text;
-        while((text = reader.readLine()) != null)
+        for(String name: Entities)
         {
+            System.out.println("Building entity attribute graph for " + name);
+            BufferedReader reader = new BufferedReader(new FileReader(filePath + name + ".txt"));
+            BufferedWriter NaiveWriter = new BufferedWriter(new FileWriter(naiveFile+ name + ".txt"));
+            //BufferedWriter wrimd = new BufferedWriter(new FileWriter(imdFile+ name + ".txt"));
+            
+            if(EntityToAttributeToSentenceList.containsKey(name) == false)
+                EntityToAttributeToSentenceList.put(name, new HashMap<>());
+            
+            String text = reader.readLine();
+
             Annotation document = new Annotation(text);
             pipeline.annotate(document);
             List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
             
             for (CoreMap sentence : sentences) {
-                //System.out.println("Sentence: " + sentence);
                 for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-                    String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
+                    String lemmatizedWord = token.get(CoreAnnotations.LemmaAnnotation.class);
                     String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
                     String word = token.get(CoreAnnotations.TextAnnotation.class);
-                    //System.out.println("word: "+word + " pos: "+pos);
                     
                     if(pos.equals("RBS") || pos.equals("JJS") || word.equals("only"))
                     {
-                        writer.write(sentence+"\n");
-                        //System.out.println(sentence);
-                        break;
+                        NaiveWriter.write(sentence+"\n");
                     }
-                    /*
+
                     if(pos.contains("VB"))
                     {
-                        wrimd.write(lemma + " --> " + sentence + "\n");
+                        if(EntityToAttributeToSentenceList.get(name).containsKey(lemmatizedWord) == false)
+                            EntityToAttributeToSentenceList.get(name).put(lemmatizedWord, new ArrayList<>());
+                        
+                        EntityToAttributeToSentenceList.get(name).get(lemmatizedWord).add(sentence.toString());
+                        
+                        if(AttributeToEntityList.containsKey(lemmatizedWord) == false)
+                            AttributeToEntityList.put(lemmatizedWord, new ArrayList<>());
+                        
+                        if(AttributeToEntityList.get(lemmatizedWord).contains(name) == false)
+                            AttributeToEntityList.get(lemmatizedWord).add(name);
                     }
-                    */
-                    //String ne = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
                 }
             }
+            NaiveWriter.close();
+            //wrimd.close();
+            reader.close();
         }
-        writer.close();
-        wrimd.close();
-        reader.close();
     }
 }

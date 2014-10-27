@@ -50,7 +50,7 @@ public class KnowledgeExtraction {
     static HashMap<String, HashMap<String, List<String> > > EntityToAttributeToSentenceList = new HashMap<>();
     static HashMap<String, List<String> > AttributeToEntityList = new HashMap<>();
     
-    public static void main(String[] args) throws IOException {
+    static void PopulateEntityList(){
         Entities.add("Sachin_Tendulkar");
         Entities.add("Sourav_Ganguly");
         Entities.add("Rahul_Dravid");
@@ -63,13 +63,21 @@ public class KnowledgeExtraction {
         Entities.add("Suresh_Raina");
         Entities.add("Irfan_Pathan");
         Entities.add("Mohammad_Azharuddin");
-        
-        GetEntityAttributeGraph();
-        
+    }
+    
+    public static void main(String[] args) throws IOException {
+        PopulateEntityList();        
         String targetEntity = Entities.get(2);
         
+        // change only below two
+        GetEntityAttributeGraph();        
         List<String> interestingFacts = GenerateAndReturnInterestingFacts(targetEntity);
         
+        // no need to change
+        printResult(interestingFacts, targetEntity);
+    }
+    
+    static void printResult(List<String> interestingFacts, String targetEntity) throws IOException {
         PrintWriter writer = new PrintWriter(resultFile + targetEntity + ".txt", "UTF-8");
         //BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile+ targetEntity + ".txt"));
         HashMap<String, Boolean> appeared = new HashMap<>();

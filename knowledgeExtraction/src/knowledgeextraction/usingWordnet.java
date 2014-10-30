@@ -24,6 +24,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +43,7 @@ public class usingWordnet {
     static String naiveFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\naive";
     static String imdFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\imd";
     static String modelFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\modelFile.txt";
+    static String graphFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Results\\GraphFile";
     
     static Boolean forceTrain = false;
     static double CONST_K = 0.1;
@@ -71,10 +73,75 @@ public class usingWordnet {
         
         // change only below two
         GetEntityAttributeGraph();        
+        printGraph();
         List<String> interestingFacts = GenerateAndReturnInterestingFacts(targetEntity);
-        
         // no need to change
-        printResult(interestingFacts, targetEntity);
+        printResult(interestingFacts, targetEntity);//*/
+        generateGEXF();
+    }
+    
+    static void generateGEXF() throws IOException{
+        /*
+        <?xml version="1.0" encoding="UTF-8"?>
+        <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+            <graph mode="static" defaultedgetype="directed">
+                <nodes>
+                    <node id="0" label="Hello" />
+                    <node id="1" label="Word" />
+                </nodes>
+                <edges>
+                    <edge id="0" source="0" target="1" />
+                </edges>
+            </graph>
+        </gexf>
+        */
+        PrintWriter writer = new PrintWriter(graphFile+".gexf", "UTF-8");
+        
+        writer.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                     "<gexf xmlns=\"http://www.gexf.net/1.2draft\" version=\"1.2\">\n" +
+                     "    <graph mode=\"static\" defaultedgetype=\"directed\">\n" +
+                     "        <nodes>\n");
+        
+        BufferedReader reader = new BufferedReader(new FileReader(graphFile + ".txt"));
+        String line;
+        while((line = reader.readLine()) != null)
+        {
+            String[] strs = line.trim().split("\\s+");
+            writer.println("            <node id=\""+ strs[0]  + "\" label=\"Entity\" />");
+            writer.println("            <node id=\""+ strs[1]  + "\" label=\"Attribute\" />");
+        }
+        reader.close();
+        writer.println("        </nodes>");
+        writer.println("        <edges>");
+        int count = 0;
+        reader = new BufferedReader(new FileReader(graphFile + ".txt"));
+        while((line = reader.readLine()) != null)
+        {
+            String[] strs = line.trim().split("\\s+");
+            writer.println("            <edge id=\""+count+"\" source=\""+strs[0]+"\" target=\""+strs[1]+"\" />");
+            count++;
+        }
+        reader.close();
+        writer.println("        </edges>");
+        writer.println("    </graph>");
+        writer.println("</gexf>");
+        writer.close();
+    }
+    
+    static void printGraph() throws IOException {
+        //static HashMap<String, List<String> >
+        PrintWriter writer = new PrintWriter(graphFile+".txt", "UTF-8");
+        Iterator it = AttributeToEntityList.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry)it.next();
+            for(String ent: (List<String>) pairs.getValue())
+            {
+                writer.println(ent+"\t"+pairs.getKey());
+            }
+            System.out.println(pairs.getKey() + " = " + pairs.getValue());
+            //it.remove(); // avoids a ConcurrentModificationException
+        }
+        writer.close();
     }
     
     static void printResult(List<String> interestingFacts, String targetEntity) throws IOException {
@@ -124,12 +191,14 @@ public class usingWordnet {
         List<String> facts = new ArrayList<>();
         
         facts.add("Target Entity has these but not others ------------------------------------------------------");
-        facts.add(" ");
+        facts.add("    ");
         for(String attribute: EntityToAttributeToSentenceList.get(targetEntity).keySet()){
             if(AttributeToEntityList.get(attribute).size() <= Entities.size() * CONST_K){
-                facts.addAll(getSentences(targetEntity, attribute));
+                for(String s: getSentences(targetEntity, attribute))
+                    facts.add(attribute + "\t\t:\t" + s);
             }
         }
+        
         facts.add("  ");
         facts.add("   ");
         facts.add("Target Entity does not has these but others have ------------------------------------------------------");
@@ -151,6 +220,7 @@ public class usingWordnet {
         {
             facts.add(naiveFacts);
         }
+        
         reader.close();
         
         System.out.println("Generating facts : done");

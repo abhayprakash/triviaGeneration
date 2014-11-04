@@ -28,6 +28,7 @@ namespace TriviaGeneration
             urls.Add(@"http://en.wikipedia.org/wiki/Suresh_Raina");
             urls.Add(@"http://en.wikipedia.org/wiki/Irfan_Pathan");
             urls.Add(@"http://en.wikipedia.org/wiki/Mohammad_Azharuddin");
+            urls.Add(@"http://en.wikipedia.org/wiki/Amitabh_Bachchan");
 
             generateTextFile(urls);
         }

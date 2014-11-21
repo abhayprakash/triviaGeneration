@@ -50,7 +50,7 @@ public class TableBuilder {
         FileWriter fw = new FileWriter(file.getAbsoluteFile());
         bw = new BufferedWriter(fw);
         
-        bw.write("matchID\tcity\tdates\tmatch_type\twinner\tteam1\tteam2\ttossWinner\ttossDecision\tumpires\tvenue\tplayer_of_match\tScore_1\tScore_2\tScore_Total\tExtra_1\tExtrac_2\tExtra_Total\tFours_1\tFours_2\tFours_Total\tSix_1\tSix_2\tSix_Total\n");//\ttotalRuns", "total4", "total6"};
+        bw.write("matchID\tcity\tdates\tmatch_type\twinner\tteam1\tteam2\ttossWinner\ttossDecision\tumpires\tvenue\tplayer_of_match\tScore_1\tScore_2\tScore_Total\tExtra_1\tExtrac_2\tExtra_Total\tFours_1\tFours_2\tFours_Total\tSix_1\tSix_2\tSix_Total\tWicket_1\tWicket_2\tWicket_Total\tlbw_1\tlbw_2\tlbw_total\t_caught_1\tcaught_2\tcaught_total\tbowled_1\tbowled_2\tbowled_total\n");//\ttotalRuns", "total4", "total6"};
         
         for (File child : directoryListing) {
             String inputFile = child.getName();
@@ -89,10 +89,43 @@ public class TableBuilder {
                 printRow += GetExtras(entry);
                 printRow += Get4s(entry);
                 printRow += Get6s(entry);
+                printRow += GetWickets(entry);
+                printRow += GetTypeOfOut(entry, "wicket", "kind", "lbw");
+                printRow += GetTypeOfOut(entry, "wicket", "kind", "caught");
+                printRow += GetTypeOfOut(entry, "wicket", "kind", "bowled");
             }
             
         }
         bw.write(printRow + "\n");
+    }
+    
+    static String GetWickets(Map.Entry<String, Object> entry)
+    {
+        String printRow = "";
+        ArrayList<Object> eObj = (ArrayList<Object>) entry.getValue();
+        //System.out.println(eObj);
+        int sum = 0;
+        for(Object obj: eObj)
+        {
+            int sumInning = 0;
+            //System.out.println(obj);
+            for(Object inning : ((Map<String, Object>)obj).values())
+            {
+                for(Object deliveries : (ArrayList<Object>)((Map<String, Object>)inning).get("deliveries"))
+                {
+                    for(Object ball: ((Map<String, Object>)deliveries).values())
+                    {
+                        if(((Map<String, Object>)ball).containsKey("wicket"))
+                            sumInning ++;
+                    }
+                }
+            }
+            printRow += "\t" + sumInning;
+            sum += sumInning;
+        }
+        //System.out.println(sum);
+        printRow += "\t" + sum;
+        return printRow;
     }
     
     static String GetRuns(Map.Entry<String, Object> entry)
@@ -112,6 +145,37 @@ public class TableBuilder {
                     for(Object ball: ((Map<String, Object>)deliveries).values())
                     {
                         sumInning += (Integer)(((Map<String, Object>)(((Map<String, Object>)ball).get("runs"))).get("total"));
+                    }
+                }
+            }
+            printRow += "\t" + sumInning;
+            sum += sumInning;
+        }
+        //System.out.println(sum);
+        printRow += "\t" + sum;
+        return printRow;
+    }
+    
+    static String GetTypeOfOut(Map.Entry<String, Object> entry, String first, String second, String third)
+    {
+        String printRow = "";
+        ArrayList<Object> eObj = (ArrayList<Object>) entry.getValue();
+        //System.out.println(eObj);
+        int sum = 0;
+        for(Object obj: eObj)
+        {
+            int sumInning = 0;
+            //System.out.println(obj);
+            for(Object inning : ((Map<String, Object>)obj).values())
+            {
+                for(Object deliveries : (ArrayList<Object>)((Map<String, Object>)inning).get("deliveries"))
+                {
+                    for(Object ball: ((Map<String, Object>)deliveries).values())
+                    {
+                        if(((Map<String, Object>)ball).containsKey(first))
+                        if(((Map<String, Object>)(((Map<String, Object>)ball).get(first))).containsKey(second))
+                        if(((Map<String, Object>)(((Map<String, Object>)ball).get(first))).get(second).equals(third))
+                            sumInning ++;
                     }
                 }
             }

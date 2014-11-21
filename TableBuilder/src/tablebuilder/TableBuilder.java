@@ -75,12 +75,15 @@ public class TableBuilder {
         Yaml yaml = new Yaml();
         String fileContent = readFile(folderPath+fileName, StandardCharsets.UTF_8);
         Map<String, Object> obj = (Map<String, Object>) yaml.load(fileContent);
-        //System.out.println(obj);
+        //System.out.println("HERE: " + ((Map<String, Object>)((Map<String, Object>)(((ArrayList<Object>)(obj.get("innings"))).get(0))).get("1st innings")).get("team"));
+        
+        String firstToBat = (String)((Map<String, Object>)((Map<String, Object>)(((ArrayList<Object>)(obj.get("innings"))).get(0))).get("1st innings")).get("team");
+        
         for (Map.Entry<String, Object> entry : obj.entrySet())
         {
             if(entry.getKey().equals("info"))
             {
-                printRow += GetBasicValues(entry);
+                printRow += GetBasicValues(entry, firstToBat);
             }
             
             if(entry.getKey().equals("innings"))
@@ -276,7 +279,7 @@ public class TableBuilder {
     }
     
     static Map<String, Integer> table = new HashMap<String, Integer>();
-    static String GetBasicValues(Map.Entry<String, Object> entry)
+    static String GetBasicValues(Map.Entry<String, Object> entry, String firstToBat)
     {
         String printRow = "";
         Map<String, Object> eObj = (Map<String, Object>) entry.getValue();
@@ -309,7 +312,10 @@ public class TableBuilder {
 
         if(eObj.containsKey("teams"))
         {
-            printRow += "\t" + ((ArrayList<String>)eObj.get("teams")).get(0) + "\t" + ((ArrayList<String>)eObj.get("teams")).get(1);
+            if(((ArrayList<String>)eObj.get("teams")).get(0).equals(firstToBat))
+                printRow += "\t" + ((ArrayList<String>)eObj.get("teams")).get(0) + "\t" + ((ArrayList<String>)eObj.get("teams")).get(1);
+            else
+                printRow += "\t" + ((ArrayList<String>)eObj.get("teams")).get(1) + "\t" + ((ArrayList<String>)eObj.get("teams")).get(0);
         }
         else
             printRow += "\t" + "NA" + "\t" + "NA";

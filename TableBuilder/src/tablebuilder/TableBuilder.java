@@ -50,7 +50,7 @@ public class TableBuilder {
         FileWriter fw = new FileWriter(file.getAbsoluteFile());
         bw = new BufferedWriter(fw);
         
-        bw.write("matchID\tcity\tdates\tmatch_type\twinner\tteam1\tteam2\ttossWinner\ttossDecision\tumpires\tvenue\tplayer_of_match\n");//\ttotalRuns", "total4", "total6"};
+        bw.write("matchID\tcity\tdates\tmatch_type\twinner\tteam1\tteam2\ttossWinner\ttossDecision\tumpires\tvenue\tplayer_of_match\tScore_1\tScore_2\tScore_Total\tExtra_1\tExtrac_2\tExtra_Total\tFours_1\tFours_2\tFours_Total\tSix_1\tSix_2\tSix_Total\n");//\ttotalRuns", "total4", "total6"};
         
         for (File child : directoryListing) {
             String inputFile = child.getName();
@@ -83,9 +83,134 @@ public class TableBuilder {
                 printRow += GetBasicValues(entry);
             }
             
+            if(entry.getKey().equals("innings"))
+            {
+                printRow += GetRuns(entry);
+                printRow += GetExtras(entry);
+                printRow += Get4s(entry);
+                printRow += Get6s(entry);
+            }
+            
         }
         bw.write(printRow + "\n");
     }
+    
+    static String GetRuns(Map.Entry<String, Object> entry)
+    {
+        String printRow = "";
+        ArrayList<Object> eObj = (ArrayList<Object>) entry.getValue();
+        //System.out.println(eObj);
+        int sum = 0;
+        for(Object obj: eObj)
+        {
+            int sumInning = 0;
+            //System.out.println(obj);
+            for(Object inning : ((Map<String, Object>)obj).values())
+            {
+                for(Object deliveries : (ArrayList<Object>)((Map<String, Object>)inning).get("deliveries"))
+                {
+                    for(Object ball: ((Map<String, Object>)deliveries).values())
+                    {
+                        sumInning += (Integer)(((Map<String, Object>)(((Map<String, Object>)ball).get("runs"))).get("total"));
+                    }
+                }
+            }
+            printRow += "\t" + sumInning;
+            sum += sumInning;
+        }
+        //System.out.println(sum);
+        printRow += "\t" + sum;
+        return printRow;
+    }
+    
+    static String GetExtras(Map.Entry<String, Object> entry)
+    {
+        String printRow = "";
+        ArrayList<Object> eObj = (ArrayList<Object>) entry.getValue();
+        //System.out.println(eObj);
+        int sum = 0;
+        for(Object obj: eObj)
+        {
+            int sumInning = 0;
+            //System.out.println(obj);
+            for(Object inning : ((Map<String, Object>)obj).values())
+            {
+                for(Object deliveries : (ArrayList<Object>)((Map<String, Object>)inning).get("deliveries"))
+                {
+                    for(Object ball: ((Map<String, Object>)deliveries).values())
+                    {
+                        sumInning += (Integer)(((Map<String, Object>)(((Map<String, Object>)ball).get("runs"))).get("extras"));
+                    }
+                }
+            }
+            printRow += "\t" + sumInning;
+            sum += sumInning;
+        }
+        //System.out.println(sum);
+        printRow += "\t" + sum;
+        return printRow;
+    }
+    
+    static String Get4s(Map.Entry<String, Object> entry)
+    {
+        String printRow = "";
+        ArrayList<Object> eObj = (ArrayList<Object>) entry.getValue();
+        //System.out.println(eObj);
+        int sum = 0;
+        for(Object obj: eObj)
+        {
+            int sumInning = 0;
+            //System.out.println(obj);
+            for(Object inning : ((Map<String, Object>)obj).values())
+            {
+                for(Object deliveries : (ArrayList<Object>)((Map<String, Object>)inning).get("deliveries"))
+                {
+                    for(Object ball: ((Map<String, Object>)deliveries).values())
+                    {
+                        int temp = (Integer)(((Map<String, Object>)(((Map<String, Object>)ball).get("runs"))).get("batsman"));
+                        if(temp == 4)
+                            sumInning ++;
+                    }
+                }
+            }
+            printRow += "\t" + sumInning;
+            sum += sumInning;
+        }
+        //System.out.println(sum);
+        printRow += "\t" + sum;
+        return printRow;
+    }
+    
+    static String Get6s(Map.Entry<String, Object> entry)
+    {
+        String printRow = "";
+        ArrayList<Object> eObj = (ArrayList<Object>) entry.getValue();
+        //System.out.println(eObj);
+        int sum = 0;
+        for(Object obj: eObj)
+        {
+            int sumInning = 0;
+            //System.out.println(obj);
+            for(Object inning : ((Map<String, Object>)obj).values())
+            {
+                for(Object deliveries : (ArrayList<Object>)((Map<String, Object>)inning).get("deliveries"))
+                {
+                    for(Object ball: ((Map<String, Object>)deliveries).values())
+                    {
+                        int temp = (Integer)(((Map<String, Object>)(((Map<String, Object>)ball).get("runs"))).get("batsman"));
+                        if(temp == 6)
+                            sumInning ++;
+                    }
+                }
+            }
+            printRow += "\t" + sumInning;
+            sum += sumInning;
+        }
+        //System.out.println(sum);
+        printRow += "\t" + sum;
+        return printRow;
+    }
+    
     static Map<String, Integer> table = new HashMap<String, Integer>();
     static String GetBasicValues(Map.Entry<String, Object> entry)
     {

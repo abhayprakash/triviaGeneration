@@ -84,31 +84,43 @@ public class TableFromDBPedia {
     
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         ArrayList<String> ListOfTypeOfEntities = new ArrayList<>();
+        ListOfTypeOfEntities.add("BollywoodActresses");
         ListOfTypeOfEntities.add("Cricketers");
+        ListOfTypeOfEntities.add("Actor");
+        ListOfTypeOfEntities.add("Film");
+        ListOfTypeOfEntities.add("FootballPlayers");
+        ListOfTypeOfEntities.add("ResearchProjects");
+        ListOfTypeOfEntities.add("Scientists");
         
         for(String type: ListOfTypeOfEntities)
         {
             Table.clear();
             allColumns.clear();
-            String filePath_ListOfEntities = inputFolder + type + ".txt";
+            String filePath_ListOfEntities = inputFolder.replace("Input\\", "") + type + ".txt";
         
-            // Open each of the files and iterate over the listed entity URLs
-            String entityURL = "http://dbpedia.org/page/Sachin_Tendulkar";
-            String entityID = entityURL.replace("http://dbpedia.org/page/", "");
-            GetRowForEntityURL(entityID);
+            BufferedReader br = new BufferedReader(new FileReader(filePath_ListOfEntities));
+            String entityURL;
+            while ((entityURL = br.readLine()) != null) {
+                String entityID = entityURL.replace("http://dbpedia.org/resource/", "");
+                GetRowForEntityURL(entityID);
+            }
             PrintTable(type);
+            System.out.println("DONE: " + type + "========================================");
         }
     }
     
     static void DownloadFile(String entityID) throws MalformedURLException, IOException
     {
+        File downloadAt = new File(inputFolder + entityID + ".txt");
+        if(downloadAt.exists())
+            return;
         URL url = new URL("http://dbpedia.org/data/" + entityID + ".rdf");
-        FileUtils.copyURLToFile(url, new File(inputFolder + entityID + ".txt"));        
-        System.out.println("Finished");
+        FileUtils.copyURLToFile(url, downloadAt);
     }
     
     static void GetRowForEntityURL(String entityID) throws IOException, ParserConfigurationException, SAXException
     {
+        System.out.println(entityID);
         Table.putIfAbsent(entityID, new HashMap<String, ArrayList<String> >());
         DownloadFile(entityID);
         String xml_FilePath = inputFolder + entityID + ".txt";

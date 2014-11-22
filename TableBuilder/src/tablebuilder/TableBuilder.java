@@ -33,8 +33,8 @@ public class TableBuilder {
     /**
      * @param args the command line arguments
      */
-    static String folderPath = "E:\\Cricket\\odis\\";
-    static String resultFile = "E:\\Cricket\\odisResult\\table.txt";
+    static String folderPath = "E:\\Cricket\\AllMatches\\";
+    static String resultFile = "E:\\Cricket\\AllMatchesResult\\table.txt";
     static BufferedWriter bw;
     
     public static void main(String[] args) throws IOException {

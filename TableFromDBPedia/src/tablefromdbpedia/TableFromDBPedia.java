@@ -167,8 +167,9 @@ public class TableFromDBPedia {
             String saveFilePath = saveDir + File.separator + fileName;
              
             // opens an output stream to save into file
-            saveFilePath.replace(".rdf", ".txt");
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+            //saveFilePath.replace(".rdf", ".txt");
+            String downloadAt = inputFolder + entityID + ".txt";
+            FileOutputStream outputStream = new FileOutputStream(downloadAt);
  
             int bytesRead = -1;
             byte[] buffer = new byte[4096];

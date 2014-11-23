@@ -11,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -82,10 +83,10 @@ public class TableFromDBPedia {
         bw.close();
     }
     
-    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
+    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
         ArrayList<String> ListOfTypeOfEntities = new ArrayList<>();
-        ListOfTypeOfEntities.add("BollywoodActresses");
-        ListOfTypeOfEntities.add("Actor");
+        //ListOfTypeOfEntities.add("BollywoodActresses");
+        //ListOfTypeOfEntities.add("Actor");
         ListOfTypeOfEntities.add("Cricketers");
         ListOfTypeOfEntities.add("Film");
         ListOfTypeOfEntities.add("FootballPlayers");
@@ -100,20 +101,32 @@ public class TableFromDBPedia {
         
             BufferedReader br = new BufferedReader(new FileReader(filePath_ListOfEntities));
             String entityURL;
+            ArrayList<Thread> threads = new ArrayList<>();
             while ((entityURL = br.readLine()) != null) {
                 String entityID = entityURL.replace("http://dbpedia.org/resource/", "");
-                try{
-                    GetRowForEntityURL(entityID);
-                }catch(Exception e)
-                {
-                    System.out.println("Ignored: " + entityID + " Error: " + e.getMessage());
-                }
+                
+                Thread t = new Thread(new Runnable() {
+                    public void run()
+                    {
+                        try{
+                            GetRowForEntityURL(entityID);
+                        }catch(Exception e)
+                        {
+                            System.out.println("Ignored: " + entityID + " Error: " + e.getMessage());
+                        }
+                    }
+                });
+                t.start();//.run();
+                threads.add(t);
             }
+            for(int i = 0; i < threads.size(); i++)
+                threads.get(i).join();
+            System.out.println("***********Threads Joined******************");
             PrintTable(type);
             System.out.println("DONE: " + type + "========================================");
         }
     }
-    
+    /*
     static void DownloadFile(String entityID) throws MalformedURLException, IOException
     {
         File downloadAt = new File(inputFolder + entityID + ".txt");
@@ -121,6 +134,56 @@ public class TableFromDBPedia {
             return;
         URL url = new URL("http://dbpedia.org/data/" + entityID + ".rdf");
         FileUtils.copyURLToFile(url, downloadAt);
+    }
+    */
+    
+    public static void downloadFile(String entityID) throws IOException {
+        String fileURL = "http://dbpedia.org/data/" + entityID + ".rdf";
+        String saveDir = inputFolder;
+        URL url = new URL(fileURL);
+        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        int responseCode = httpConn.getResponseCode();
+ 
+        // always check HTTP response code first
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            String fileName = "";
+            String disposition = httpConn.getHeaderField("Content-Disposition");
+            
+            if (disposition != null) {
+                // extracts file name from header field
+                int index = disposition.indexOf("filename=");
+                if (index > 0) {
+                    fileName = disposition.substring(index + 10,
+                            disposition.length() - 1);
+                }
+            } else {
+                // extracts file name from URL
+                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
+                        fileURL.length());
+            }
+ 
+            // opens input stream from the HTTP connection
+            InputStream inputStream = httpConn.getInputStream();
+            String saveFilePath = saveDir + File.separator + fileName;
+             
+            // opens an output stream to save into file
+            saveFilePath.replace(".rdf", ".txt");
+            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+ 
+            int bytesRead = -1;
+            byte[] buffer = new byte[4096];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+ 
+            outputStream.close();
+            inputStream.close();
+ 
+            //System.out.println("File downloaded");
+        } else {
+            System.out.println("Download Failed. Server replied HTTP code: " + responseCode);
+        }
+        httpConn.disconnect();
     }
     
     static String GetValueFromLink(String link)

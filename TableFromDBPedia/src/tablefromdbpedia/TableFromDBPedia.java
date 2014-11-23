@@ -85,8 +85,8 @@ public class TableFromDBPedia {
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         ArrayList<String> ListOfTypeOfEntities = new ArrayList<>();
         ListOfTypeOfEntities.add("BollywoodActresses");
-        ListOfTypeOfEntities.add("Cricketers");
         ListOfTypeOfEntities.add("Actor");
+        ListOfTypeOfEntities.add("Cricketers");
         ListOfTypeOfEntities.add("Film");
         ListOfTypeOfEntities.add("FootballPlayers");
         ListOfTypeOfEntities.add("ResearchProjects");
@@ -102,7 +102,12 @@ public class TableFromDBPedia {
             String entityURL;
             while ((entityURL = br.readLine()) != null) {
                 String entityID = entityURL.replace("http://dbpedia.org/resource/", "");
-                GetRowForEntityURL(entityID);
+                try{
+                    GetRowForEntityURL(entityID);
+                }catch(Exception e)
+                {
+                    System.out.println("Ignored: " + entityID + " Error: " + e.getMessage());
+                }
             }
             PrintTable(type);
             System.out.println("DONE: " + type + "========================================");

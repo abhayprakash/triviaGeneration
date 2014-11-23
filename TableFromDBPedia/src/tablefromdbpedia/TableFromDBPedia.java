@@ -195,7 +195,7 @@ public class TableFromDBPedia {
     {
         System.out.println(entityID);
         Table.putIfAbsent(entityID, new HashMap<String, ArrayList<String> >());
-        DownloadFile(entityID);
+        downloadFile(entityID);
         String xml_FilePath = inputFolder + entityID + ".txt";
         
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

@@ -123,6 +123,11 @@ public class TableFromDBPedia {
         FileUtils.copyURLToFile(url, downloadAt);
     }
     
+    static String GetValueFromLink(String link)
+    {
+        return link.replace("http://dbpedia.org/resource/", "");
+    }
+    
     static void GetRowForEntityURL(String entityID) throws IOException, ParserConfigurationException, SAXException
     {
         System.out.println(entityID);
@@ -164,6 +169,19 @@ public class TableFromDBPedia {
                                         allColumns.add(columnName);                                    
                                     Table.get(entityID).putIfAbsent(columnName, new ArrayList<>());
                                     Table.get(entityID).get(columnName).add(eChild.getTextContent());
+                                }
+                                else
+                                {
+                                    //rdf:resource
+                                    String linkValue = eChild.getAttribute("rdf:resource");
+                                    String value = GetValueFromLink(linkValue);
+                                    if(!value.isEmpty())
+                                    {
+                                        if(!allColumns.contains(columnName))
+                                        allColumns.add(columnName);                                    
+                                        Table.get(entityID).putIfAbsent(columnName, new ArrayList<>());
+                                        Table.get(entityID).get(columnName).add(value);
+                                    }
                                 }
                             }
                         }

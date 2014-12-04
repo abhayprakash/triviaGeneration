@@ -13,9 +13,10 @@ namespace TriviaGeneration
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
             List<string> urls = new List<string>();
+            /*
             urls.Add(@"http://en.wikipedia.org/wiki/Sachin_Tendulkar");
             urls.Add(@"http://en.wikipedia.org/wiki/Virender_Sehwag");
             urls.Add(@"http://en.wikipedia.org/wiki/Sourav_Ganguly");
@@ -29,15 +30,30 @@ namespace TriviaGeneration
             urls.Add(@"http://en.wikipedia.org/wiki/Irfan_Pathan");
             urls.Add(@"http://en.wikipedia.org/wiki/Mohammad_Azharuddin");
             urls.Add(@"http://en.wikipedia.org/wiki/Amitabh_Bachchan");
+            */
+            /*
+            urls.Add(@"http://en.wikipedia.org/wiki/Will_Smith");
+            urls.Add(@"http://en.wikipedia.org/wiki/Tom_Hanks");
+            urls.Add(@"http://en.wikipedia.org/wiki/Bradley_Cooper");
+            urls.Add(@"http://en.wikipedia.org/wiki/Tom_Cruise");
+            urls.Add(@"http://en.wikipedia.org/wiki/Jude_Law");
+            urls.Add(@"http://en.wikipedia.org/wiki/Robert_Pattinson");
+            urls.Add(@"http://en.wikipedia.org/wiki/Matt_Damon");
+            urls.Add(@"http://en.wikipedia.org/wiki/Brad_Pitt");
+            urls.Add(@"http://en.wikipedia.org/wiki/Johnny_Depp");
+            urls.Add(@"http://en.wikipedia.org/wiki/Leonardo_DiCaprio");
+            */
 
             generateTextFile(urls);
+            //GenerateSentencesWithEntityName(urls);
         }
 
+        
         static void generateTextFile(List<string> urls)
         {
             foreach (string url in urls)
             {
-                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\" + url.Remove(0, 29) + ".txt";
+                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\wikiText\HollywoodActors\" + url.Remove(0, 29) + ".txt";
 
                 if (File.Exists(fileName))
                     continue;

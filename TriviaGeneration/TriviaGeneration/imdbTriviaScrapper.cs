@@ -12,23 +12,31 @@ namespace TriviaGeneration
 {
     class imdbTriviaScrapper
     {
-        static String URLformat = @"http://m.imdb.com/name/nmXXXXXXX/trivia"; // 0006795
-        static String AllfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\imdbTrivia\allTrivia.txt";
+        //static String URLformat = @"http://m.imdb.com/name/nmXXXXXXX/trivia"; // 0006795
+        static String AllfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Celebs\allTrivia.txt";
         static System.IO.StreamWriter positiveDataFile;
 
         static void Main(string[] args)
         {
-            positiveDataFile = new System.IO.StreamWriter(AllfileName);
-            for (int i = 1; i < 1006795; i++)
+            positiveDataFile = new System.IO.StreamWriter(AllfileName, true);
+            List<string> topCelebsList = NameID_Scrapper.GetNameIDsForTop(1000);
+            foreach (string s in topCelebsList)
+            {
+                String URL = @"http://m.imdb.com" + s + "/trivia";
+                generateTextFile(URL);
+            }
+            /*
+            for (int i = 9542; i < 1006795; i++)
             {
                 String Number = i.ToString("D7");
                 String URL = URLformat.Replace("XXXXXXX", Number);
 
                 //new Thread(delegate()
                 //{
-                    generateTextFile(URL);
+                generateTextFile(URL);
                 //}).Start();
             }
+             */
             positiveDataFile.Close();
         }
 
@@ -37,7 +45,7 @@ namespace TriviaGeneration
         {
             HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
             HtmlAgilityPack.HtmlDocument doc = web.Load(URL);
-
+            
             string entityName = "";
             foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//title"))
             {
@@ -45,11 +53,15 @@ namespace TriviaGeneration
             }
             entityName = entityName.Replace(" - Trivia - IMDb", "");
             entityName = entityName.Replace("\n", "");
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\imdbTrivia\" + entityName + ".txt";
-            
+
+            if (entityName.Equals("IMDb"))
+                return;
+
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Celebs\indivFiles\" + entityName + ".txt";
+
             //if (File.Exists(entityName))
               //  return;
-
+            
             String Trivias = "";
             try
             {
@@ -62,12 +74,28 @@ namespace TriviaGeneration
             }
             catch (Exception e)
             {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.BackgroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("Ignored: " + entityName);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
             }
-            System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);
-            textFile.Write(Trivias);
-            textFile.Close();
-            Console.WriteLine("done: " + entityName);
+            try
+            {
+                if (!Trivias.Length.Equals(0))
+                {
+                    System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);
+                    textFile.Write(Trivias);
+                    textFile.Close();
+                    Console.WriteLine("done: " + entityName);
+                }
+            }catch(Exception e){
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                Console.WriteLine("Ignored: " + entityName);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+            }
         }
     }
 }

@@ -21,6 +21,8 @@ namespace TriviaGeneration
             Console.ReadLine();
         }
         */
+        static HashSet<string> alreadyOccured = new HashSet<string>();
+                
         public static List<String> GetNameIDsForTop(int n)
         {
             List<string> toret = new List<string>();
@@ -48,7 +50,6 @@ namespace TriviaGeneration
                 HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
                 HtmlAgilityPack.HtmlDocument doc = web.Load(URL);
 
-                HashSet<string> alreadyOccured = new HashSet<string>();
                 foreach (var s in doc.DocumentNode.SelectNodes("//tr/td/a/@href"))
                 {
                     string cand = s.GetAttributeValue("href", "NOT");

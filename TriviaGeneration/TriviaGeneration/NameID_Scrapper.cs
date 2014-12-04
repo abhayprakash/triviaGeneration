@@ -10,7 +10,7 @@ namespace TriviaGeneration
 {
     class NameID_Scrapper
     {
-        static string URL = @"http://www.imdb.com/search/name?gender=male,female&ref_=nv_cel_m_3&start=XX";
+        static string preURL = @"http://www.imdb.com/search/name?gender=male,female&ref_=nv_cel_m_3&start=";
         /*
         static void Main()
         {
@@ -44,9 +44,11 @@ namespace TriviaGeneration
             Console.WriteLine("Oh, I need to scrap the list first :/");
             System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);
             
-            for (int Number = 1; Number < n; Number += 50)
+            for (int Number = 1; Number < n; Number = Number + 50)
             {
-                URL = URL.Replace("XX", Number.ToString());
+                Console.WriteLine("here " + Number);
+                string URL = preURL + Number.ToString();
+                Console.WriteLine("scraping now : " + URL);
                 HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
                 HtmlAgilityPack.HtmlDocument doc = web.Load(URL);
 
@@ -56,9 +58,11 @@ namespace TriviaGeneration
                     if (cand.StartsWith("/name/nm"))
                     {
                         if (!alreadyOccured.Contains(cand))
+                        {
                             toret.Add(cand);
-                        alreadyOccured.Add(cand);
-                        textFile.Write(cand + "\n");
+                            alreadyOccured.Add(cand);
+                            textFile.Write(cand + "\n");
+                        }
                     }
                 }
             }

@@ -13,7 +13,7 @@ namespace TriviaGeneration
     class imdbTriviaScrapper
     {
         //static String URLformat = @"http://m.imdb.com/name/nmXXXXXXX/trivia"; // 0006795
-        static String AllfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Celebs\allTrivia.txt";
+        static String AllfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Movies\allTrivia.txt";
         static System.IO.StreamWriter positiveDataFile;
 
         static void Main(string[] args)
@@ -22,9 +22,11 @@ namespace TriviaGeneration
             List<string> topCelebsList = NameID_Scrapper.GetNameIDsForTop(1000);
             foreach (string s in topCelebsList)
             {
-                String URL = @"http://m.imdb.com" + s + "/trivia";
+                //String URL = @"http://m.imdb.com" + s + "/trivia";
+                String URL = @"http://www.imdb.com" + s + "trivia";
                 generateTextFile(URL);
             }
+            //Console.ReadLine();
             /*
             for (int i = 9542; i < 1006795; i++)
             {
@@ -57,7 +59,7 @@ namespace TriviaGeneration
             if (entityName.Equals("IMDb"))
                 return;
 
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Celebs\indivFiles\" + entityName + ".txt";
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Movies\indivFiles\" + entityName + ".txt";
 
             //if (File.Exists(entityName))
               //  return;
@@ -65,11 +67,16 @@ namespace TriviaGeneration
             String Trivias = "";
             try
             {
-                foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//p"))
+                foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//div/div[@class=\"sodatext\"]"))
                 {
-                    String oneRow = row.InnerText.Replace("\n", "") + "\n";
-                    Trivias += oneRow;
-                    positiveDataFile.Write(entityName + ": " + oneRow);
+                    String oneRow = row.InnerText.Replace("\n", "");
+                    HtmlNode childNode = row.SelectNodes("./../div[@class=\"did-you-know-actions\"]/a").ElementAt(0);
+                    String rating = childNode.InnerText;
+                    rating = rating.Replace(" found this interesting", "");
+                    rating = rating.Replace(" of ", " ");
+                    String[] s = rating.Split(new char[] { ' ' });
+                    Trivias += oneRow + "\t" + s[0] + "\t" + s[1] + "\n";
+                    positiveDataFile.Write(entityName + "\t" + oneRow + "\t" + s[0] + "\t" + s[1] + "\n");
                 }
             }
             catch (Exception e)
@@ -92,7 +99,7 @@ namespace TriviaGeneration
             }catch(Exception e){
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine("Ignored: " + entityName);
+                Console.WriteLine("Ignored: " + entityName + " :: " + e.Message);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.BackgroundColor = ConsoleColor.Black;
             }

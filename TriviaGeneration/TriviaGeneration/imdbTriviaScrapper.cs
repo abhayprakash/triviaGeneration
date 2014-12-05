@@ -13,7 +13,7 @@ namespace TriviaGeneration
     class imdbTriviaScrapper
     {
         //static String URLformat = @"http://m.imdb.com/name/nmXXXXXXX/trivia"; // 0006795
-        static String AllfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Movies\allTrivia.txt";
+        static String AllfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\selected1000Movies\allTrivia.txt";
         static System.IO.StreamWriter positiveDataFile;
 
         static void Main(string[] args)
@@ -59,7 +59,7 @@ namespace TriviaGeneration
             if (entityName.Equals("IMDb"))
                 return;
 
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Movies\indivFiles\" + entityName + ".txt";
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\selected1000Movies\indivFiles\" + entityName + ".txt";
 
             //if (File.Exists(entityName))
               //  return;
@@ -75,8 +75,11 @@ namespace TriviaGeneration
                     rating = rating.Replace(" found this interesting", "");
                     rating = rating.Replace(" of ", " ");
                     String[] s = rating.Split(new char[] { ' ' });
-                    Trivias += oneRow + "\t" + s[0] + "\t" + s[1] + "\n";
-                    positiveDataFile.Write(entityName + "\t" + oneRow + "\t" + s[0] + "\t" + s[1] + "\n");
+                    Trivias += oneRow + "\t" + s[0] + "\t" + s[1] + "\t" + s[2] + "\n";
+                    //Console.WriteLine("here " + s.Length);
+                    //Console.WriteLine(s[1] + " : " + s[2]);
+                    positiveDataFile.Write(entityName + "\t" + oneRow + "\t" + s[0] + "\t" + s[1] + "\t" + s[2] + "\n");
+                    //positiveDataFile.Flush();
                 }
             }
             catch (Exception e)

@@ -29,7 +29,7 @@ namespace TriviaGeneration
         {
             List<string> toret = new List<string>();
 
-            string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\top1000Movies\list.txt";
+            string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\selected1000Movies\list.txt";
 
             if (File.Exists(fileName))
             {

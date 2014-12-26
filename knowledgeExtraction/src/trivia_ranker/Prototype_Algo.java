@@ -34,32 +34,52 @@ import java.util.Set;
  *
  * @author Abhay Prakash
  */
-public class Prototype_Algo {
+public class Prototype_Algo {    
     static String trainCorpusPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\cleanCorpus_train\\";
     static String testCorpusPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\cleanCorpus_test\\";
     static String savedPrototype = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\prototype.obj";
     static String wordFreqFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\wordFreq.txt";
-    static String originalTestFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\test_Hunger.txt";
+    static String weightFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\weights.txt";
+    static String originalTestFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\test_hunger.txt";
+    static String rankedResultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\ranked_hunger.txt";
+    
     static HashMap<String, Integer> wordCount = new HashMap<String, Integer>();
     static HashMap<String, String> repToOrig = new HashMap<String, String>();
+    
+    static Boolean weighted = false;
+    
     public static void main(String[] args) throws IOException, ClassNotFoundException
     {
-        File file = new File(savedPrototype);
+        File file = new File(wordFreqFile);//savedPrototype);
         // if file doesnt exists, then create it
         if (!file.exists()) {
             System.out.println("We need to make prototype vector");
             getPrototypeVector();
-            savePrototypeVector();
+            //savePrototypeVector();
+            printSortedByFreq();
         }
         else
         {
             System.out.println("already present prototype vector - reading that");
-            readPrototypeVector();
+            //readPrototypeVector();
+            readPrototypeVectorFromTxt();
         }
         
         RankTrivia();
         //printSortedByFreq();
         //test();
+    }
+    
+    static void readPrototypeVectorFromTxt() throws FileNotFoundException, IOException
+    {
+        BufferedReader br = new BufferedReader(new FileReader(wordFreqFile));
+        String line;
+        while((line = br.readLine() )!= null)
+        {
+            String keyValue[] = line.split("\t");
+            wordCount.put(keyValue[0], Integer.parseInt(keyValue[1]));
+        }
+        br.close();
     }
     
     static void RankTrivia() throws IOException
@@ -83,11 +103,11 @@ public class Prototype_Algo {
             }
         } );
         
-        FileWriter fw = new FileWriter(wordFreqFile);
+        FileWriter fw = new FileWriter(rankedResultFile);
         BufferedWriter bw = new BufferedWriter(fw);
         
         for(Map.Entry<String, Double> entry:list){
-            System.out.println(entry.getKey()+"\t"+entry.getValue());
+            bw.write(repToOrig.get(entry.getKey())+"\t"+entry.getValue()+"\n");
         }
         
         bw.close();
@@ -140,23 +160,10 @@ public class Prototype_Algo {
             fileContent = fileContent.trim();
             
             String original = br.readLine();
-            
             repToOrig.put(fileContent, original);
         }
     }
     
-    /*
-    static void getSumSq()
-    {
-        for (Map.Entry<String, Integer> entry : wordCount.entrySet())
-        {
-            long val = entry.getValue();
-            rootsumSquare += val*val;
-        }
-        System.out.println(rootsumSquare);
-        rootsumSquare = (long) Math.sqrt(rootsumSquare);
-    }
-    */
     static void printSortedByFreq() throws IOException
     {
         Set<Entry<String, Integer>> set = wordCount.entrySet();
@@ -206,12 +213,20 @@ public class Prototype_Algo {
     
     static void getPrototypeVector() throws IOException
     {
+        BufferedReader br = new BufferedReader(new FileReader(weightFile));
         File dir = new File(trainCorpusPath);
         File[] directoryListing = dir.listFiles();
+        String weight;
+        int i =0;
         for (File child : directoryListing) {
-            String inputFile = child.getName();
-            ReadAndUpdateMap(inputFile);
+            i++;
+            weight = br.readLine();
+            weight = weight.replace(",", "");
+            weight = weight.replace("\"", "");
+            String inputFile = i+".txt";//child.getName();
+            ReadAndUpdateMap(inputFile, Integer.parseInt(weight));
         }
+        br.close();
     }
     
     static String readFile(String path, Charset encoding) throws IOException 
@@ -220,24 +235,28 @@ public class Prototype_Algo {
         return new String(encoded, encoding);
     }
     
-    static void ReadAndUpdateMap(String fileName) throws IOException
+    static void ReadAndUpdateMap(String fileName, int w) throws IOException
     {
         String fileContent = readFile(trainCorpusPath+fileName, StandardCharsets.UTF_8);
         fileContent = fileContent.replaceAll("\n", "");
         fileContent = fileContent.trim();
-        ProcessString(fileContent);
+        ProcessString(fileContent, w);
         //System.out.println(fileContent);
     }
     
-    static void ProcessString(String s)
+    static void ProcessString(String s, int wt)
     {
+        //System.out.println("String: " + s);
         String words[] = s.split("\\s+");
         for(String w : words)
         {
             if(!wordCount.containsKey(w))
                 wordCount.put(w, 0);
             
-            wordCount.put(w, wordCount.get(w) + 1);
+            if(weighted.equals(false))
+                wt = 1;
+            
+            wordCount.put(w, wordCount.get(w) + wt);
         }
     }
 }

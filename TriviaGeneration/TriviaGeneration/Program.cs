@@ -13,47 +13,41 @@ namespace TriviaGeneration
 {
     class Program
     {
-        static void Main2(string[] args)
+        static System.IO.StreamWriter positiveDataFile;
+        static void Main(string[] args)
         {
-            List<string> urls = new List<string>();
+            string allfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countryTrivia.txt";
+            positiveDataFile = new System.IO.StreamWriter(allfileName, true);
+
             /*
             urls.Add(@"http://en.wikipedia.org/wiki/Sachin_Tendulkar");
-            urls.Add(@"http://en.wikipedia.org/wiki/Virender_Sehwag");
-            urls.Add(@"http://en.wikipedia.org/wiki/Sourav_Ganguly");
-            urls.Add(@"http://en.wikipedia.org/wiki/Rahul_Dravid");
-            urls.Add(@"http://en.wikipedia.org/wiki/Mahendra_Singh_Dhoni");
-            urls.Add(@"http://en.wikipedia.org/wiki/V._V._S._Laxman");
-            urls.Add(@"http://en.wikipedia.org/wiki/Yuvraj_Singh");
-            urls.Add(@"http://en.wikipedia.org/wiki/Virat_Kohli");
-            urls.Add(@"http://en.wikipedia.org/wiki/Gautam_Gambhir");
-            urls.Add(@"http://en.wikipedia.org/wiki/Suresh_Raina");
-            urls.Add(@"http://en.wikipedia.org/wiki/Irfan_Pathan");
-            urls.Add(@"http://en.wikipedia.org/wiki/Mohammad_Azharuddin");
-            urls.Add(@"http://en.wikipedia.org/wiki/Amitabh_Bachchan");
             */
-            /*
-            urls.Add(@"http://en.wikipedia.org/wiki/Will_Smith");
-            urls.Add(@"http://en.wikipedia.org/wiki/Tom_Hanks");
-            urls.Add(@"http://en.wikipedia.org/wiki/Bradley_Cooper");
-            urls.Add(@"http://en.wikipedia.org/wiki/Tom_Cruise");
-            urls.Add(@"http://en.wikipedia.org/wiki/Jude_Law");
-            urls.Add(@"http://en.wikipedia.org/wiki/Robert_Pattinson");
-            urls.Add(@"http://en.wikipedia.org/wiki/Matt_Damon");
-            urls.Add(@"http://en.wikipedia.org/wiki/Brad_Pitt");
-            urls.Add(@"http://en.wikipedia.org/wiki/Johnny_Depp");
-            urls.Add(@"http://en.wikipedia.org/wiki/Leonardo_DiCaprio");
-            */
-
-            generateTextFile(urls);
-            //GenerateSentencesWithEntityName(urls);
+            
+            //urls.Add(@"http://en.wikipedia.org/wiki/Interstellar_%28film%29");
+            //urls.Add(@"http://www.sciencekids.co.nz/sciencefacts/countries/brazil.html");
+            
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countriesAvailable.txt";
+            StreamReader r = new StreamReader(fileName);
+            string line;
+            while ((line = r.ReadLine()) != null)
+            {
+                String[] s = line.Split(new char[] { '\t' });
+                String url = "http://www.sciencekids.co.nz/sciencefacts/countries/"+s[0];
+                String countryName = s[1];
+                generateTextFile(url, countryName);
+            }
+            
+            //generateTextFile(urls);
+            positiveDataFile.Flush();
+            positiveDataFile.Close();
+            Console.ReadLine();
         }
-
         
         static void generateTextFile(List<string> urls)
         {
             foreach (string url in urls)
             {
-                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\wikiText\HollywoodActors\" + url.Remove(0, 29) + ".txt";
+                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\brazil.txt";
 
                 if (File.Exists(fileName))
                     continue;
@@ -66,16 +60,37 @@ namespace TriviaGeneration
             }
         }
 
-        static string getText(string url)
+        static void generateTextFile(String url, String countryName)
+        {
+            string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\"+countryName+".txt";
+
+            if (File.Exists(fileName))
+                return;
+
+            string text = getText(url, countryName);
+            System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);
+            textFile.Write(text);
+            textFile.Close();
+            Console.WriteLine("done: " + url);
+        }
+
+        static string getText(string url, string cn = "")
         {
             HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
             HtmlAgilityPack.HtmlDocument doc = web.Load(url);
 
             string text="";
-
-            foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//p"))
+            try
             {
-                text += row.InnerText + " ";
+                foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//li/p"))
+                {
+                    text += row.InnerText + "\n";
+                    positiveDataFile.WriteLine(cn + "\t" + row.InnerText);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: " + url + "\n" + e.ToString());
             }
 
             string pattern = "citation needed";

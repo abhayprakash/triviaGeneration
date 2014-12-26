@@ -16,6 +16,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.*;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.*;
@@ -86,12 +88,14 @@ public class TableFromDBPedia {
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
         ArrayList<String> ListOfTypeOfEntities = new ArrayList<>();
         //ListOfTypeOfEntities.add("BollywoodActresses");
+        ListOfTypeOfEntities.add("1bollywoodActresses");
+        //ListOfTypeOfEntities.add("BollywoodActors");
         //ListOfTypeOfEntities.add("Actor");
-        ListOfTypeOfEntities.add("Cricketers");
-        ListOfTypeOfEntities.add("Film");
-        ListOfTypeOfEntities.add("FootballPlayers");
-        ListOfTypeOfEntities.add("ResearchProjects");
-        ListOfTypeOfEntities.add("Scientists");
+        //ListOfTypeOfEntities.add("Cricketers");
+        //ListOfTypeOfEntities.add("Film");
+        //ListOfTypeOfEntities.add("FootballPlayers");
+        //ListOfTypeOfEntities.add("ResearchProjects");
+        //ListOfTypeOfEntities.add("Scientists");
         
         for(String type: ListOfTypeOfEntities)
         {
@@ -113,12 +117,22 @@ public class TableFromDBPedia {
                         }catch(Exception e)
                         {
                             System.out.println("Ignored: " + entityID + " Error: " + e.getMessage());
+                            if(e.getMessage().equals("Connection timed out: connect"))
+                            {
+                                try {
+                                    Thread.currentThread().sleep(1000);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(TableFromDBPedia.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                this.run();
+                            }
                         }
                     }
                 });
                 t.start();//.run();
                 threads.add(t);
             }
+            System.out.println("***********Joining******************");
             for(int i = 0; i < threads.size(); i++)
                 threads.get(i).join();
             System.out.println("***********Threads Joined******************");
@@ -141,11 +155,17 @@ public class TableFromDBPedia {
         String fileURL = "http://dbpedia.org/data/" + entityID + ".rdf";
         String saveDir = inputFolder;
         URL url = new URL(fileURL);
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-        int responseCode = httpConn.getResponseCode();
- 
+        HttpURLConnection httpConn;// = (HttpURLConnection) url.openConnection();
+        int responseCode;// = httpConn.getResponseCode();
+        do{
+            httpConn = (HttpURLConnection) url.openConnection();
+            responseCode = httpConn.getResponseCode();
+        }
+        while(responseCode != HttpURLConnection.HTTP_OK);
+        
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("Downloading for: "+entityID);
             String fileName = "";
             String disposition = httpConn.getHeaderField("Content-Disposition");
             

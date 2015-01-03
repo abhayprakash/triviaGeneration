@@ -13,19 +13,17 @@ namespace TriviaGeneration
 {
     class Program
     {
-        static System.IO.StreamWriter positiveDataFile;
+        //static System.IO.StreamWriter positiveDataFile;
         static void Main(string[] args)
         {
-            string allfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countryTrivia.txt";
-            positiveDataFile = new System.IO.StreamWriter(allfileName, true);
+            //string allfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countryTrivia.txt";
+            //positiveDataFile = new System.IO.StreamWriter(allfileName, true);
 
+            List<string> urls = new List<string>();
+            urls.Add(@"http://en.wikipedia.org/wiki/Gravity_%28film%29");
+            urls.Add(@"http://en.wikipedia.org/wiki/Interstellar_%28film%29");
+            
             /*
-            urls.Add(@"http://en.wikipedia.org/wiki/Sachin_Tendulkar");
-            */
-            
-            //urls.Add(@"http://en.wikipedia.org/wiki/Interstellar_%28film%29");
-            //urls.Add(@"http://www.sciencekids.co.nz/sciencefacts/countries/brazil.html");
-            
             String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countriesAvailable.txt";
             StreamReader r = new StreamReader(fileName);
             string line;
@@ -36,10 +34,10 @@ namespace TriviaGeneration
                 String countryName = s[1];
                 generateTextFile(url, countryName);
             }
-            
-            //generateTextFile(urls);
-            positiveDataFile.Flush();
-            positiveDataFile.Close();
+            */
+            generateTextFile(urls);
+            //positiveDataFile.Flush();
+            //positiveDataFile.Close();
             Console.ReadLine();
         }
         
@@ -47,7 +45,7 @@ namespace TriviaGeneration
         {
             foreach (string url in urls)
             {
-                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\brazil.txt";
+                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\movieTest\indivFiles\" + url.Remove(0, 29) + ".txt";
 
                 if (File.Exists(fileName))
                     continue;
@@ -80,19 +78,14 @@ namespace TriviaGeneration
             HtmlAgilityPack.HtmlDocument doc = web.Load(url);
 
             string text="";
-            try
+            
+            foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//p"))
             {
-                foreach (HtmlNode row in doc.DocumentNode.SelectNodes("//li/p"))
-                {
-                    text += row.InnerText + "\n";
-                    positiveDataFile.WriteLine(cn + "\t" + row.InnerText);
-                }
+                text += row.InnerText + "\n";
+                Console.WriteLine("HERE: " + row.InnerText);
+                //positiveDataFile.WriteLine(cn + "\t" + row.InnerText);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine("ERROR: " + url + "\n" + e.ToString());
-            }
-
+            
             string pattern = "citation needed";
             string replacement = "0";
             Regex rgx1 = new Regex(pattern);

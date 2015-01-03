@@ -14,6 +14,9 @@ mat_name <- create_matrix(as.numeric(as.factor(name)))
 mat <- cbind(mat_name, matrix)
 container <- create_container(mat, t(training_codes), trainSize=1:5904, testSize=5905:7380, virgin=FALSE)
 
-model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "radial")
+model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
 results <- classify_model(container, model)
 analytics <- create_analytics(container, results)
+analytics@algorithm_summary
+
+w = t(model$coefs) %*% model$SV

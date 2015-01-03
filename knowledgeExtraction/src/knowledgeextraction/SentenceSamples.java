@@ -29,11 +29,11 @@ public class SentenceSamples {
         SentenceModel model = new SentenceModel(is);
         SentenceDetectorME sdetector = new SentenceDetectorME(model);
         
-        File writeFile = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\dataForCF.txt");
+        File writeFile = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\movieTest\\movieTestTrivia.txt");
         writeFile.createNewFile();
         FileWriter writer = new FileWriter(writeFile); 
 
-        String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Movies\\input\\";
+        String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\movieTest\\indivFiles\\";
         File[] files = new File(folderPath).listFiles();
         for (File file : files) {
             if(file.isFile()){
@@ -41,15 +41,20 @@ public class SentenceSamples {
                 
                 FileReader inputFile = new FileReader(folderPath + file.getName());
                 BufferedReader bufferReader = new BufferedReader(inputFile);
-                String input = bufferReader.readLine();
-                System.out.println("Here: " + input);
-                bufferReader.close();
-                String sentences[] = sdetector.sentDetect(input);
-                for(int i=0;i<sentences.length;i++){
-                    String name = file.getName().replace("_", " ");
-                    //writer.write(name.replace(".txt", ": ") + sentences[i] + "\n");
-                    writer.write(sentences[i] + "\n");
+                String input;
+                while((input = bufferReader.readLine()) != null)
+                {
+                    //System.out.println("Here: " + input);
+                    String sentences[] = sdetector.sentDetect(input);
+                    for(int i=0;i<sentences.length;i++){
+                        String name = file.getName().replace("_", " ");
+                        name = name.replace("%28", "(");
+                        name = name.replace("%29", ")");
+                        writer.write(name.replace(".txt", "\t") + sentences[i] + "\n");
+                        //writer.write(movieName + "\t" + sentences[i] + "\n");
+                    }
                 }
+                bufferReader.close();
             }
             writer.flush();
         }

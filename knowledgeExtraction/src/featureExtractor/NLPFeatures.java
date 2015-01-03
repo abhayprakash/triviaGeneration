@@ -58,82 +58,87 @@ public class NLPFeatures {
         bw_nerType.write(Integer.toString(lineId));
         
         //text = "A gigantic Hong Kong set was constructed in downtown Detroit. The set was so big that the Detroit People Mover track ended up becoming part of the set and shooting had to be adjusted to allow the track to move through the set.  ";//"One of three new television series scheduled for release in 2014 based on DC Comics characters. The others being Constantine (2014) and The Flash (2014).  ";
-        
-        Annotation document = new Annotation(text);
-        pipeline.annotate(document);
-
-        List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
-        
         HashMap<String, Integer> nerCount = new HashMap<>();
         int superlativePOS = 0;
-        for (CoreMap sentence : sentences) {
-            SemanticGraph dependencies = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-            // getting root words
-            for(IndexedWord rword: dependencies.getRoots())
-            {
-                //System.out.println(rword.lemma());
-                //System.out.println(rword.ner());
-                if(rword.ner().equals("O"))           
-                    bw_root.write(" " + rword.lemma());
-                else if(rword.ner().equals("PERSON"))
-                    bw_root.write(" " + rword.originalText());
-                else
-                    bw_root.write(" entity_" + rword.ner());
-                
-                // under root
-                for(IndexedWord child: dependencies.getChildren(rword))
+        
+        try{
+            Annotation document = new Annotation(text);
+            pipeline.annotate(document);
+
+            List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+
+            for (CoreMap sentence : sentences) {
+                SemanticGraph dependencies = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+                // getting root words
+                for(IndexedWord rword: dependencies.getRoots())
                 {
-                    //System.out.println("here: " + child.originalText());
-                    if(child.ner().equals("PERSON"))
-                        bw_underRoot.write(" " + child.originalText());
-                    else if(!child.ner().equals("O"))
-                        bw_underRoot.write(" entity_"+child.ner());
-                }
-                
-                // nsubj | nsubpass words
-                GrammaticalRelation[] subjects = {
-                    EnglishGrammaticalRelations.NOMINAL_SUBJECT,
-                    EnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT
-                    };
-                for(IndexedWord current: dependencies.descendants(rword))
-                    for(IndexedWord nsubWord : dependencies.getChildrenWithRelns(current, Arrays.asList(subjects)))
+                    //System.out.println(rword.lemma());
+                    //System.out.println(rword.ner());
+                    if(rword.ner().equals("O"))           
+                        bw_root.write(" " + rword.lemma());
+                    else if(rword.ner().equals("PERSON"))
+                        bw_root.write(" " + rword.originalText());
+                    else
+                        bw_root.write(" entity_" + rword.ner());
+
+                    // under root
+                    for(IndexedWord child: dependencies.getChildren(rword))
                     {
-                        //System.out.println("wow: " + nsubWord.originalText());
-                        if(nsubWord.ner().equals("PERSON"))
-                            bw_subj.write(" " + nsubWord.originalText());
-                        else if(nsubWord.ner().equals("O"))
-                            bw_subj.write(" "+nsubWord.lemma());
-                        else
-                            bw_subj.write(" entity_"+nsubWord.ner());
-                    }                
+                        //System.out.println("here: " + child.originalText());
+                        if(child.ner().equals("PERSON"))
+                            bw_underRoot.write(" " + child.originalText());
+                        else if(!child.ner().equals("O"))
+                            bw_underRoot.write(" entity_"+child.ner());
+                    }
+
+                    // nsubj | nsubpass words
+                    GrammaticalRelation[] subjects = {
+                        EnglishGrammaticalRelations.NOMINAL_SUBJECT,
+                        EnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT
+                        };
+                    for(IndexedWord current: dependencies.descendants(rword))
+                        for(IndexedWord nsubWord : dependencies.getChildrenWithRelns(current, Arrays.asList(subjects)))
+                        {
+                            //System.out.println("wow: " + nsubWord.originalText());
+                            if(nsubWord.ner().equals("PERSON"))
+                                bw_subj.write(" " + nsubWord.originalText());
+                            else if(nsubWord.ner().equals("O"))
+                                bw_subj.write(" "+nsubWord.lemma());
+                            else
+                                bw_subj.write(" entity_"+nsubWord.ner());
+                        }                
+                }
+
+
+
+                // NER Types frequency
+                for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+                    String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+                    String ne = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+
+                    if(pos.equals("JJS") || pos.equals("RBS"))
+                        superlativePOS++;
+
+                    nerCount.putIfAbsent(ne, 0);
+                    nerCount.put(ne, nerCount.get(ne) + 1);
+                }
+
+                //System.out.println("dependency graph:\n" + dependencies);
             }
-            
-            
-            
-            // NER Types frequency
-            for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-                String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-                String ne = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-                
-                if(pos.equals("JJS") || pos.equals("RBS"))
-                    superlativePOS++;
-                
-                nerCount.putIfAbsent(ne, 0);
-                nerCount.put(ne, nerCount.get(ne) + 1);
-            }
-            
-            //System.out.println("dependency graph:\n" + dependencies);
+        }
+        catch(Exception e)
+        {
+            System.out.println("IGNORED:");
         }
         
         bw_nerType.write("\t" + Integer.toString(superlativePOS));
-            
+
         for (String ne : ners) {
             if(nerCount.containsKey(ne))
                 bw_nerType.write("\t" + nerCount.get(ne).toString());
             else
                 bw_nerType.write("\t0");
         }
-        
         bw_root.write("\n");
         bw_underRoot.write("\n");
         bw_nerType.write("\n");

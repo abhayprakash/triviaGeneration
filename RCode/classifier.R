@@ -3,9 +3,9 @@ library(RTextTools);
 data <- read.csv("trainData_5K.txt", sep='\t', header=T)
 data <- data[sample(nrow(data)),]
 
-name <- data[,1]
-training_data <- data[2]
-training_codes <- data[3]
+name <- data[,"MOVIE_NAME_IMDB"]
+training_data <- data["TRIVIA"]
+training_codes <- data["CLASS"]
 
 totalRows <- nrow(data)
 trainEnd <- round((4*totalRows)/5)

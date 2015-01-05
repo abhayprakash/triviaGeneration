@@ -41,10 +41,10 @@ import net.didion.jwnl.data.POS;
  */
 public class NLPFeatures {
     
-    static String resultFile_Root = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\merged_earlier5kandtop1k_AND_another5k\\INT_rootWord.txt";
-    static String resultFile_underRoot = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\merged_earlier5kandtop1k_AND_another5k\\INT_underRootWords.txt";
-    static String resultFile_subj = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\merged_earlier5kandtop1k_AND_another5k\\INT_subjectWords.txt";
-    static String resultFile_nerTypePresence = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\merged_earlier5kandtop1k_AND_another5k\\INT_nerTypePresent.txt";
+    static String resultFile_Root = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_rootWord.txt";
+    static String resultFile_underRoot = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_underRootWords.txt";
+    static String resultFile_subj = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_subjectWords.txt";
+    static String resultFile_nerTypePresence = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_nerTypePresent.txt";
     static BufferedWriter bw_root, bw_subj, bw_underRoot, bw_nerType;
     
     static List<String> ners = new ArrayList<>();
@@ -75,20 +75,24 @@ public class NLPFeatures {
                     //System.out.println(rword.lemma());
                     //System.out.println(rword.ner());
                     if(rword.ner().equals("O"))           
-                        bw_root.write(" " + rword.lemma());
-                    else if(rword.ner().equals("PERSON"))
-                        bw_root.write(" " + rword.originalText());
+                        bw_root.write("\t" + rword.ner()+":"+rword.lemma());
+                    //else if(rword.ner().equals("PERSON"))
+                    else    
+                        bw_root.write("\t" + rword.ner()+":"+rword.originalText());
+                    /*
                     else
                         bw_root.write(" entity_" + rword.ner());
-
+                    */
                     // under root
                     for(IndexedWord child: dependencies.getChildren(rword))
                     {
                         //System.out.println("here: " + child.originalText());
+                        /*
                         if(child.ner().equals("PERSON"))
                             bw_underRoot.write(" " + child.originalText());
-                        else if(!child.ner().equals("O"))
-                            bw_underRoot.write(" entity_"+child.ner());
+                        else*/ 
+                        if(!child.ner().equals("O"))
+                            bw_underRoot.write("\t" + child.ner()+":"+child.originalText());
                     }
 
                     // nsubj | nsubpass words
@@ -100,12 +104,14 @@ public class NLPFeatures {
                         for(IndexedWord nsubWord : dependencies.getChildrenWithRelns(current, Arrays.asList(subjects)))
                         {
                             //System.out.println("wow: " + nsubWord.originalText());
-                            if(nsubWord.ner().equals("PERSON"))
-                                bw_subj.write(" " + nsubWord.originalText());
-                            else if(nsubWord.ner().equals("O"))
-                                bw_subj.write(" "+nsubWord.lemma());
+                            if(!nsubWord.ner().equals("O"))
+                                bw_subj.write("\t" + nsubWord.ner()+":"+nsubWord.originalText());
+                            else
+                                bw_subj.write("\t" + nsubWord.ner()+":"+nsubWord.lemma());
+                            /*
                             else
                                 bw_subj.write(" entity_"+nsubWord.ner());
+                            */
                         }                
                 }
 
@@ -153,7 +159,7 @@ public class NLPFeatures {
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\merged_earlier5kandtop1k_AND_another5k\\trainData_Merged_Trivia.txt";
+        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\trainData_5K_Trivia.txt";
         FileWriter fw = new FileWriter(resultFile_Root);
         bw_root = new BufferedWriter(fw);
         fw = new FileWriter(resultFile_subj);

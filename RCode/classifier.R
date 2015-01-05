@@ -1,14 +1,20 @@
 library(tm)
 library(RTextTools);
-data <- read.csv("trainData_withMovie.txt", sep='\t', header=T)
+data <- read.csv("trainData_5K.txt", sep='\t', header=T)
 data <- data[sample(nrow(data)),]
 
 name <- data[,1]
 training_data <- data[2]
 training_codes <- data[3]
 
+totalRows <- nrow(data)
+trainEnd <- round((4*totalRows)/5)
+testStart <- trainEnd + 1
+
+print(trainEnd)
+
 matrix <- create_matrix(training_data, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
-container <- create_container(matrix, t(training_codes), trainSize=1:5904, testSize=5905:7380, virgin=FALSE)
+container <- create_container(matrix, t(training_codes), trainSize=1:trainEnd, testSize=testStart:totalRows, virgin=FALSE)
 
 model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
 results <- classify_model(container, model)

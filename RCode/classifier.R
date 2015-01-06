@@ -24,8 +24,11 @@ addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","sup
 # converting frequencies to boolean presence
 for(col in addedFeatures)
 {
-  index <- matrix[,col] > 0
-  matrix[index,col] <- 1
+  if(col != "ORGANIZATION")
+  {
+    index <- matrix[,col] > 0
+    matrix[index,col] <- 1
+  }
 }
 
 ############ training and testing

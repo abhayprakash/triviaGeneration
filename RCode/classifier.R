@@ -1,6 +1,6 @@
 library(tm)
 library(RTextTools);
-data <- read.csv("trainData_5K_POS_NERcount.txt", sep='\t', header=T)
+data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
 data <- data[sample(nrow(data)),]
 
 #name <- data[,"MOVIE_NAME_IMDB"]
@@ -11,7 +11,15 @@ totalRows <- nrow(data)
 trainEnd <- round((4*totalRows)/5)
 testStart <- trainEnd + 1
 
+# Unigram words
 matrix <- create_matrix(training_data, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
+
+# parse tree features
+root_matrix <- create_matrix(data["ROOT_WORDS"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
+subject_matrix <- create_matrix(data["SUBJECT_WORDS"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
+under_root_matrix <- create_matrix(data["UNDER_ROOT_WORDS"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
+all_linked_entities_matrix <- create_matrix(data["ALL_LINKABLE_ENTITIES_PRESENT"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
+matrix <- cbind(matrix, as.matrix(all_linked_entities_matrix), as.matrix(root_matrix), as.matrix(subject_matrix), as.matrix(under_root_matrix))
 
 # + frequency of superlative POS as feature
 matrix <- cbind(as.matrix(matrix), data["superPOS"])
@@ -24,11 +32,8 @@ addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","sup
 # converting frequencies to boolean presence
 for(col in addedFeatures)
 {
-  if(col != "ORGANIZATION")
-  {
-    index <- matrix[,col] > 0
-    matrix[index,col] <- 1
-  }
+  index <- matrix[,col] > 0
+  matrix[index,col] <- 1
 }
 
 ############ training and testing

@@ -158,9 +158,10 @@ public class EntityLinker {
         for(int i = 1; i < row.length; i++)
         {
             String[] ner_Word = row[i].split(":");
+            ner_Word[1] = ner_Word[1].toLowerCase();
             if(ner_Word[0].equals("O"))
             {
-                String print = prefix + ner_Word[1].toLowerCase();
+                String print = prefix + ner_Word[1];
                 if(!alreadyOccured.containsKey(print))
                 {
                     bw.write(print + " ");
@@ -174,7 +175,8 @@ public class EntityLinker {
                 {
                     for(String candidate : dict.get(movieID).get(entity_X))
                     {
-                        if(Arrays.asList(candidate.split(" ")).contains(ner_Word[1]))
+                        candidate = candidate.toLowerCase();
+                        if(Arrays.asList(candidate.split(" ")).contains(ner_Word[1]) && !STOPWORDS.contains(ner_Word[1]))
                         {
                             String print = prefix + entity_X; 
                             if(!alreadyOccured.containsKey(print))

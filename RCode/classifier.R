@@ -61,6 +61,11 @@ zeroFeatures <- colnames(matrix)[-w@ja]
 cat("Total num of NON-ZERO features: ", nrow(featureWeights) , "/" , ncol(matrix))
 print(subset(featureWeights, features %in% addedFeatures))
 
+# get results for analysis of false negatives and false positives
+actualKnownResultsForTestRows <- data.frame(training_codes[testStart:totalRows,])
+test_TriviaSentences <- data.frame(training_data[testStart:totalRows,])
+comparingData <- cbind(test_TriviaSentences, results, actualKnownResultsForTestRows)
+
 # predicting
 test_data <- read.csv("interstellar.txt", header=T)
 test_matrix <- create_matrix(test_data, language = "english", removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)

@@ -78,8 +78,8 @@ public class EntityLinker {
         FileReader inputFile = new FileReader(In_movieID_Trivia);
         BufferedReader bufferReader = new BufferedReader(inputFile);
         
-        //FileWriter fw = new FileWriter(Out_allEntitiesPresent);
-        //bw_allEntities = new BufferedWriter(fw);
+        FileWriter fw = new FileWriter(Out_allEntitiesPresent);
+        bw_allEntities = new BufferedWriter(fw);
         
         String line;
         int lineNum = 0;
@@ -91,11 +91,11 @@ public class EntityLinker {
             movieIDs.add(row[0]);
             if(row.length > 2)
                 System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum);
-            //ProcessSingleLine_AllEnitiesPresent(row[0],row[1]);
+            ProcessSingleLine_AllEnitiesPresent(row[0],row[1]);
         }
         System.out.println("found all linkable entities, number of lines: " + lineNum);
-        //bw_allEntities.flush();
-        //bw_allEntities.close();
+        bw_allEntities.flush();
+        bw_allEntities.close();
     }
     
     static void ProcessSingleLine_AllEnitiesPresent(String movieID,String Trivia) throws IOException
@@ -188,8 +188,8 @@ public class EntityLinker {
                             break;
                         }
                     }
-                    if(linked)
-                        break;
+                    //if(linked)
+                      //  break;
                 }
                 
                 if(linked.equals(false))

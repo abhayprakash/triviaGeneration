@@ -239,7 +239,7 @@ public class EntityLinker {
         {
             String movieID = movieIDs.get(lineNum);
             lineNum++;
-            Process_Sentence(movieID, line, bw_underRoot, "root_");
+            Process_Sentence(movieID, line, bw_underRoot, "underRoot_");
         }
         System.out.println("processed for root, number of lines: " + lineNum);
         bw_underRoot.flush();

@@ -65,6 +65,7 @@ print(subset(featureWeights, features %in% addedFeatures))
 actualKnownResultsForTestRows <- data.frame(training_codes[testStart:totalRows,])
 test_TriviaSentences <- data.frame(training_data[testStart:totalRows,])
 comparingData <- cbind(test_TriviaSentences, results, actualKnownResultsForTestRows)
+write.table(comparingData, file="falseNeg_Pos_analysis.txt", row.names=F, sep='\t')
 
 # predicting
 test_data <- read.csv("interstellar.txt", header=T)

@@ -78,8 +78,8 @@ public class EntityLinker {
         FileReader inputFile = new FileReader(In_movieID_Trivia);
         BufferedReader bufferReader = new BufferedReader(inputFile);
         
-        FileWriter fw = new FileWriter(Out_allEntitiesPresent);
-        bw_allEntities = new BufferedWriter(fw);
+        //FileWriter fw = new FileWriter(Out_allEntitiesPresent);
+        //bw_allEntities = new BufferedWriter(fw);
         
         String line;
         int lineNum = 0;
@@ -91,11 +91,11 @@ public class EntityLinker {
             movieIDs.add(row[0]);
             if(row.length > 2)
                 System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum);
-            ProcessSingleLine_AllEnitiesPresent(row[0],row[1]);
+            //ProcessSingleLine_AllEnitiesPresent(row[0],row[1]);
         }
         System.out.println("found all linkable entities, number of lines: " + lineNum);
-        bw_allEntities.flush();
-        bw_allEntities.close();
+        //bw_allEntities.flush();
+        //bw_allEntities.close();
     }
     
     static void ProcessSingleLine_AllEnitiesPresent(String movieID,String Trivia) throws IOException
@@ -130,18 +130,119 @@ public class EntityLinker {
         bw_allEntities.write("\n");
     }
     
-    static void Process_RootWords()
+    static void Process_RootWords() throws FileNotFoundException, IOException
     {
+        FileReader inputFile = new FileReader(In_rootWords);
+        BufferedReader bufferReader = new BufferedReader(inputFile);
         
+        FileWriter fw = new FileWriter(Out_rootWords);
+        bw_root = new BufferedWriter(fw);
+        
+        String line;
+        int lineNum = 0;
+        while((line = bufferReader.readLine()) != null)
+        {
+            String movieID = movieIDs.get(lineNum);
+            lineNum++;
+            Process_Sentence(movieID, line, bw_root, "root_");
+        }
+        System.out.println("processed for root, number of lines: " + lineNum);
+        bw_root.flush();
+        bw_root.close();
     }
     
-    static void Process_subjWords()
+    static void Process_Sentence(String movieID, String line, BufferedWriter bw, String prefix) throws IOException
     {
-        
+        String[] row = line.split("\t");
+        HashMap<String, Integer> alreadyOccured = new HashMap<>();
+        for(int i = 1; i < row.length; i++)
+        {
+            String[] ner_Word = row[i].split(":");
+            if(ner_Word[0].equals("O"))
+            {
+                String print = prefix + ner_Word[1].toLowerCase();
+                if(!alreadyOccured.containsKey(print))
+                {
+                    bw.write(print + " ");
+                    alreadyOccured.put(print, 1);
+                }
+            }
+            else
+            {
+                Boolean linked = false;
+                for(String entity_X : dict.get(movieID).keySet())
+                {
+                    for(String candidate : dict.get(movieID).get(entity_X))
+                    {
+                        if(Arrays.asList(candidate.split(" ")).contains(ner_Word[1]))
+                        {
+                            String print = prefix + entity_X; 
+                            if(!alreadyOccured.containsKey(print))
+                            {
+                                bw.write(print + " ");
+                                alreadyOccured.put(print, 1);
+                            }
+                            linked = true;
+                            break;
+                        }
+                    }
+                    if(linked)
+                        break;
+                }
+                
+                if(linked.equals(false))
+                {
+                    String print = prefix + "unlinked_" + ner_Word[0];
+                    if(!alreadyOccured.containsKey(print))
+                    {
+                        bw.write(print + " ");
+                        alreadyOccured.put(print, 1);
+                    }
+                }
+            }
+        }
+        bw.write("\n");
     }
     
-    static void Process_underRootWords()
+    static void Process_subjWords() throws IOException
     {
+        FileReader inputFile = new FileReader(In_subjWords);
+        BufferedReader bufferReader = new BufferedReader(inputFile);
         
+        FileWriter fw = new FileWriter(Out_subjWords);
+        bw_subj = new BufferedWriter(fw);
+        
+        String line;
+        int lineNum = 0;
+        while((line = bufferReader.readLine()) != null)
+        {
+            String movieID = movieIDs.get(lineNum);
+            lineNum++;
+            Process_Sentence(movieID, line, bw_subj, "subj_");
+        }
+        System.out.println("processed for subject words, number of lines: " + lineNum);
+        bw_subj.flush();
+        bw_subj.close();
+    }
+    
+    static void Process_underRootWords() throws IOException
+    {
+        FileReader inputFile = new FileReader(In_underRootWords);
+        BufferedReader bufferReader = new BufferedReader(inputFile);
+        
+        FileWriter fw = new FileWriter(Out_underRootWors);
+        bw_underRoot = new BufferedWriter(fw);
+        
+        String line;
+        int lineNum = 0;
+        while((line = bufferReader.readLine()) != null)
+        {
+            String movieID = movieIDs.get(lineNum);
+            lineNum++;
+            Process_Sentence(movieID, line, bw_underRoot, "root_");
+        }
+        System.out.println("processed for root, number of lines: " + lineNum);
+        bw_underRoot.flush();
+        bw_underRoot.close();
     }
 }

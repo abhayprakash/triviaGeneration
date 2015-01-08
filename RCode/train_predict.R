@@ -78,7 +78,7 @@ rm(train_validate_rows, trainEnd, validateStart, train_validate_matrix, train_va
 
 # training
 model <- train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
-rm(train_validate_containe)
+rm(train_validate_container)
 
 # preparing container for test data
 test_rows <- nrow(test_matrix)
@@ -90,4 +90,4 @@ test_results <- classify_model(test_container, model)
 rm(model, test_container)
 
 #generating result file for unseen test
-write.table(test_results,"Result_rich.txt", sep='\t',row.names=F)
+write.table(test_results,"Result_1gram.txt", sep='\t',row.names=F)

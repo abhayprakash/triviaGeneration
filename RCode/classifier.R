@@ -30,7 +30,7 @@ matrix <- cbind(matrix, as.matrix(data["superPOS"]))
 
 # + frequency of different NERs
 matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
-#matrix <- as.matrix(matrix)
+
 addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS")
 
 # converting frequencies to boolean presence
@@ -66,8 +66,3 @@ actualKnownResultsForTestRows <- data.frame(training_codes[testStart:totalRows,]
 test_TriviaSentences <- data.frame(training_data[testStart:totalRows,])
 comparingData <- cbind(test_TriviaSentences, results, actualKnownResultsForTestRows)
 write.table(comparingData, file="falseNeg_Pos_analysis.txt", row.names=F, sep='\t')
-
-# predicting
-test_data <- read.csv("interstellar.txt", header=T)
-test_matrix <- create_matrix(test_data, language = "english", removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
-test_container <- create_container(test_matrix, rep(1,320), testSize=1:320, virgin=TRUE)

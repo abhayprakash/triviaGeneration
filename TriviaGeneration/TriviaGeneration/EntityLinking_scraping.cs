@@ -11,7 +11,7 @@ namespace TriviaGeneration
     class EntityLinking_scraping
     {
         static StreamWriter writer;
-        static void Main(string[] args)
+        static void Main22(string[] args)
         {
             String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\movie_URL.txt";
             String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\entityLinks.txt";

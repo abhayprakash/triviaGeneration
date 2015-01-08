@@ -14,16 +14,26 @@ namespace TriviaGeneration
     class Program
     {
         //static System.IO.StreamWriter positiveDataFile;
-        static void Main232(string[] args)
+        static void Main(string[] args)
         {
             //string allfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countryTrivia.txt";
             //positiveDataFile = new System.IO.StreamWriter(allfileName, true);
-            /*
-            List<string> urls = new List<string>();
-            urls.Add(@"http://en.wikipedia.org/wiki/Gravity_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Interstellar_%28film%29");
-            */
             
+            List<string> urls = new List<string>();
+            urls.Add(@"http://en.wikipedia.org/wiki/Lone_Survivor_%28film%29");
+            urls.Add(@"http://en.wikipedia.org/wiki/Man_of_Steel_%28film%29");
+            urls.Add(@"http://en.wikipedia.org/wiki/Final_Destination_%28film%29");
+            urls.Add(@"http://en.wikipedia.org/wiki/The_Incredibles");
+            urls.Add(@"http://en.wikipedia.org/wiki/Transformers:_Dark_of_the_Moon");
+            urls.Add(@"http://en.wikipedia.org/wiki/The_Deer_Hunter");
+            urls.Add(@"http://en.wikipedia.org/wiki/Who_Framed_Roger_Rabbit");
+            urls.Add(@"http://en.wikipedia.org/wiki/Batman_Begins");
+            urls.Add(@"http://en.wikipedia.org/wiki/Rio_2");
+            urls.Add(@"http://en.wikipedia.org/wiki/Her_%28film%29");
+
+            generateTextFile(urls);
+            
+            /*
             String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\punagr_country.txt";
             StreamReader r = new StreamReader(fileName);
             string line;
@@ -34,8 +44,7 @@ namespace TriviaGeneration
                 String countryName = line;
                 generateTextFile(url, countryName);
             }
-            
-            //generateTextFile(urls);
+            */
             //positiveDataFile.Flush();
             //positiveDataFile.Close();
             Console.ReadLine();
@@ -45,10 +54,13 @@ namespace TriviaGeneration
         {
             foreach (string url in urls)
             {
-                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\movieTest\indivFiles\" + url.Remove(0, 29) + ".txt";
-
+                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\movieTest\indivFiles\" + url.Remove(0, 29).Replace(":", "") +".txt";
+                
                 if (File.Exists(fileName))
+                {
+                    Console.WriteLine("Already done: " + url);
                     continue;
+                }
 
                 string text = getText(url);
                 System.IO.StreamWriter textFile = new System.IO.StreamWriter(fileName);

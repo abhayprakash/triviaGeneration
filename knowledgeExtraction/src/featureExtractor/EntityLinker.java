@@ -23,7 +23,7 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\entityLinking\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\entityLinking\\";
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
     static String Out_rootWords = folderPath + "PRO_rootWord.txt";
     static String In_subjWords = folderPath + "INT_D_subjectWords.txt";
@@ -103,7 +103,7 @@ public class EntityLinker {
         Trivia = Trivia.trim().toLowerCase();
         String words[] = Trivia.split(" ");
         //System.out.println("Trivia: " + Trivia);
-                        
+        //System.out.println("movie: " + movieID);         
         for(String entity_X: dict.get(movieID).keySet())
         {//continue if found i.e. break inner for loops
             //System.out.println("entity type: " + entity_X);

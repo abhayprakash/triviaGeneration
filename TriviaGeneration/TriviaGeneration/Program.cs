@@ -14,7 +14,7 @@ namespace TriviaGeneration
     class Program
     {
         //static System.IO.StreamWriter positiveDataFile;
-        static void Main(string[] args)
+        static void Main22(string[] args)
         {
             //string allfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countryTrivia.txt";
             //positiveDataFile = new System.IO.StreamWriter(allfileName, true);

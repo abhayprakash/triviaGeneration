@@ -11,10 +11,10 @@ namespace TriviaGeneration
     class EntityLinking_scraping
     {
         static StreamWriter writer;
-        static void Main22(string[] args)
+        static void Main(string[] args)
         {
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\movie_URL.txt";
-            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\entityLinks.txt";
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\test_wikiText\movie_URL.txt";
+            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\test_wikiText\entityLinks.txt";
             StreamReader r = new StreamReader(fileName);
             writer = new StreamWriter(writeFile);
             string URL; int nn = 1;

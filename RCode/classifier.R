@@ -14,7 +14,7 @@ testStart <- trainEnd + 1
 matrix <- NULL
 
 # Unigram words
-matrix <- create_matrix(training_data, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
+matrix <- create_matrix(training_data, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTf)
 
 # parse tree features
 root_matrix <- create_matrix(data["ROOT_WORDS"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)

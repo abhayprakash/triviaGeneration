@@ -9,10 +9,12 @@ package featureExtractor;
 import static featureExtractor.EntityLinker.In_entityDictionary;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -34,35 +36,60 @@ public class popularityMeasure {
             
     static String key = "AIzaSyAVVKmcTUk2lZc7sFJetpkWuTCxYAauHc0";           
     
-    public static void main(String[] args) throws IOException, ParseException
+    static HashMap<String, Double> knownScore_table = new HashMap<String, Double>();
+    
+    public static void main22(String[] args) throws IOException, ParseException
     {
         String json = searchTest( "Emma", "");//&scoring=entity");
         System.out.println(json);
         System.out.println(ParseJSON_getScore(json));
     }
     
-    public static void main122(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException{
+        ReadKnownPopularityScores();
         FileWriter fw = new FileWriter(Out_resultFile);
         BufferedWriter bw = new BufferedWriter(fw);
         
         FileReader inputFile = new FileReader(In_entities);
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String line;
-        line = bufferReader.readLine();
         while((line = bufferReader.readLine()) != null)
         {
             String[] row = line.split("\t");
-            String json = searchTest( row[1], "&scoring=entity");
             double score = 0;
-            try{
-                score = ParseJSON_getScore(json);
-            }catch(Exception e){
-                score = 0;
+            String entityName = row[1].toLowerCase().trim();
+            if(knownScore_table.containsKey(entityName))
+            {
+                //System.out.println("Already known for: " + entityName);
+                score = knownScore_table.get(entityName);
+            }
+            else{
+                System.out.println("Not known for: " + entityName);
+                String json = searchTest( entityName, "&scoring=entity");
+                try{
+                    score = ParseJSON_getScore(json);
+                }catch(Exception e){
+                    score = 0;
+                }
             }
             bw.write(row[0] + "\t" + row[1] + "\t" + score + "\n");
             System.out.println(row[0]);
         }
         bw.close();
+    }
+    
+    static void ReadKnownPopularityScores() throws FileNotFoundException, IOException
+    {
+        String known = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\knownPopularity.txt";
+        FileReader inputFile = new FileReader(known);
+        BufferedReader bufferReader = new BufferedReader(inputFile);
+        String line;                                                                                                                                          
+        while((line = bufferReader.readLine()) != null)
+        {
+            String[] row = line.split("\t");
+            knownScore_table.put(row[0].toLowerCase().trim(), Double.parseDouble(row[1]));
+        }
+        System.out.println("Read: " + knownScore_table.size());
     }
     
     static double ParseJSON_getScore(String s) throws ParseException

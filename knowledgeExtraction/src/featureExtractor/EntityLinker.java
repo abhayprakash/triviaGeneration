@@ -23,7 +23,7 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\entityLinking\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\entityLinking\\";
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
     static String Out_rootWords = folderPath + "PRO_rootWord.txt";
     static String In_subjWords = folderPath + "INT_D_subjectWords.txt";

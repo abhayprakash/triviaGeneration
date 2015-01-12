@@ -1,8 +1,8 @@
 library(tm)
 library(RTextTools);
-#data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
-#data <- data[sample(nrow(data)),]
-load("compareData.RData")
+data <- read.csv("trainData_rich_pop.txt", sep='\t', header=T)
+data <- data[sample(nrow(data)),]
+#load("compareData.RData")
 
 #name <- data[,"MOVIE_NAME_IMDB"]
 training_data <- data["TRIVIA"]
@@ -31,8 +31,11 @@ matrix <- cbind(matrix, as.matrix(data["superPOS"]))
 # + frequency of different NERs
 matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS")
+# + popularity of entities
+matrix <- cbind(matrix, as.matrix(data[,c("low_pop","med_pop","high_pop","very_high_pop")]))
 
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "low_pop","med_pop","high_pop","very_high_pop")
+ 
 # converting frequencies to boolean presence
 for(col in addedFeatures)
 {

@@ -23,7 +23,7 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\entityLinking\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\entityLinking\\";
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
     static String Out_rootWords = folderPath + "PRO_rootWord.txt";
     static String In_subjWords = folderPath + "INT_D_subjectWords.txt";
@@ -34,6 +34,7 @@ public class EntityLinker {
     static String In_entityDictionary = folderPath + "entityLinks.txt";
     static String In_movieID_Trivia = folderPath + "movieID_Trivia.txt";
     static String Out_allEntitiesPresent = folderPath + "PRO_allLinkedEntities.txt";
+    static String Out_ExpandedEntities = folderPath + "PRO_ExpandedEntites.txt";
     
     static BufferedWriter bw_root, bw_subj, bw_underRoot, bw_allEntities;
     
@@ -48,10 +49,69 @@ public class EntityLinker {
         STOPWORDS = Arrays.asList(list.split(","));
         
         ReadDictionary();
+        ExpandEntityNames();
+        /*
         ReadIDs_and_processAllPresentLinkedEntities();
         Process_RootWords();
         Process_subjWords();
         Process_underRootWords();
+        */
+    }
+    
+    static void ExpandEntityNames() throws FileNotFoundException, IOException
+    {
+        FileReader inputFile = new FileReader(In_movieID_Trivia);
+        BufferedReader bufferReader = new BufferedReader(inputFile);
+        
+        FileWriter fw = new FileWriter(Out_ExpandedEntities);
+        BufferedWriter bw = new BufferedWriter(fw);
+        
+        String line;
+        int lineNum = 0;
+        while((line = bufferReader.readLine()) != null)
+        {
+            lineNum++;
+            String[] row = line.split("\t");
+            row[0] = row[0].trim();
+            movieIDs.add(row[0]);
+            if(row.length > 2)
+                System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum);
+            Expansion_H(row[0],row[1], bw);
+        }
+        System.out.println("found all linkable entities, number of lines: " + lineNum);
+        bw.flush();
+        bw.close();
+    }
+    
+    static void Expansion_H(String movieID,String Trivia, BufferedWriter bw) throws IOException
+    {
+        Trivia = Trivia.trim().toLowerCase();
+        String words[] = Trivia.split(" ");
+        
+        HashMap<String, Integer> alreadyOccured = new HashMap<>();
+        for(String entity_X: dict.get(movieID).keySet())
+        {
+            for(String candidate : dict.get(movieID).get(entity_X))
+            {
+                candidate = candidate.toLowerCase();
+                Boolean toBreak = false;
+                for(String triviaWord : words)
+                {
+                    if(Arrays.asList(candidate.split(" ")).contains(triviaWord) && !STOPWORDS.contains(triviaWord))
+                    {
+                        if(!alreadyOccured.containsKey(candidate)){
+                            bw.write(candidate + " ");
+                            alreadyOccured.put(candidate, 1);
+                        }
+                        toBreak = true;
+                        break;
+                    }
+                }
+                if(toBreak)
+                    break;
+            }
+        }
+        bw.write("\n");
     }
     
     static void ReadDictionary() throws FileNotFoundException, IOException

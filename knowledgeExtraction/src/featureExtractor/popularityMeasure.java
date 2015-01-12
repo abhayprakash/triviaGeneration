@@ -36,7 +36,8 @@ public class popularityMeasure {
     
     public static void main(String[] args) throws IOException, ParseException
     {
-        String json = searchTest( "Aamir Khan", "&scoring=entity");
+        String json = searchTest( "Emma", "");//&scoring=entity");
+        System.out.println(json);
         System.out.println(ParseJSON_getScore(json));
     }
     

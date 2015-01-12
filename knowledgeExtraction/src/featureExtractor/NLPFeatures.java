@@ -41,10 +41,10 @@ import net.didion.jwnl.data.POS;
  */
 public class NLPFeatures {
     
-    static String resultFile_Root = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\INT_D_rootWord.txt";
-    static String resultFile_underRoot = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\INT_D_underRootWords.txt";
-    static String resultFile_subj = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\INT_D_subjectWords.txt";
-    static String resultFile_nerTypePresence = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\INT_D_nerTypePresent.txt";
+    static String resultFile_Root = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\INT_D_rootWord.txt";
+    static String resultFile_underRoot = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\INT_D_underRootWords.txt";
+    static String resultFile_subj = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\INT_D_subjectWords.txt";
+    static String resultFile_nerTypePresence = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\INT_D_nerTypePresent.txt";
     static BufferedWriter bw_root, bw_subj, bw_underRoot, bw_nerType;
     
     static List<String> ners = new ArrayList<>();
@@ -107,8 +107,10 @@ public class NLPFeatures {
                             if(!nsubWord.ner().equals("O"))
                                 bw_subj.write("\t" + nsubWord.ner()+":"+nsubWord.originalText());
                             else
+                            {
+                                //System.out.println(nsubWord.lemma());
                                 bw_subj.write("\t" + nsubWord.ner()+":"+nsubWord.lemma());
-                            /*
+                            }/*
                             else
                                 bw_subj.write(" entity_"+nsubWord.ner());
                             */
@@ -159,7 +161,7 @@ public class NLPFeatures {
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\testMovies_wiki_trivia.txt";
+        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\testMovies_wiki_trivia.txt";
         FileWriter fw = new FileWriter(resultFile_Root);
         bw_root = new BufferedWriter(fw);
         fw = new FileWriter(resultFile_subj);
@@ -191,6 +193,7 @@ public class NLPFeatures {
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String input;
         int lineNum = 0;
+        input = bufferReader.readLine();
         while((input = bufferReader.readLine()) != null)
         {
             processLine(input, lineNum);

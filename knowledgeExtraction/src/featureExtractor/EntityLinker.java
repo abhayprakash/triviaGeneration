@@ -23,7 +23,7 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\test_wikiText\\entityLinking\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\";
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
     static String Out_rootWords = folderPath + "PRO_rootWord.txt";
     static String In_subjWords = folderPath + "INT_D_subjectWords.txt";
@@ -32,7 +32,7 @@ public class EntityLinker {
     static String Out_underRootWors = folderPath + "PRO_underRootWords.txt";
     
     static String In_entityDictionary = folderPath + "entityLinks.txt";
-    static String In_movieID_Trivia = folderPath + "movieID_Trivia.txt";
+    static String In_movieID_Trivia = folderPath + "test_movieId_movie_trivia.txt";
     static String Out_allEntitiesPresent = folderPath + "PRO_allLinkedEntities.txt";
     static String Out_ExpandedEntities = folderPath + "PRO_ExpandedEntites.txt";
     
@@ -49,15 +49,15 @@ public class EntityLinker {
         STOPWORDS = Arrays.asList(list.split(","));
         
         ReadDictionary();
-        ExpandEntityNames();
-        /*
+        //ExpandEntityNames();
+        
         ReadIDs_and_processAllPresentLinkedEntities();
         Process_RootWords();
         Process_subjWords();
         Process_underRootWords();
-        */
+        
     }
-    
+    /*
     static void ExpandEntityNames() throws FileNotFoundException, IOException
     {
         FileReader inputFile = new FileReader(In_movieID_Trivia);
@@ -73,8 +73,8 @@ public class EntityLinker {
             String[] row = line.split("\t");
             row[0] = row[0].trim();
             movieIDs.add(row[0]);
-            if(row.length > 2)
-                System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum);
+            if(row.length > 3)
+                System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum + " :: " + row.length);
             Expansion_H(lineNum, row[0],row[1], bw);
             lineNum++;
         }
@@ -112,7 +112,7 @@ public class EntityLinker {
             }
         }
     }
-    
+    */
     static void ReadDictionary() throws FileNotFoundException, IOException
     {
         FileReader inputFile = new FileReader(In_entityDictionary);
@@ -142,15 +142,20 @@ public class EntityLinker {
         
         String line;
         int lineNum = 0;
+        line = bufferReader.readLine();
         while((line = bufferReader.readLine()) != null)
         {
-            lineNum++;
             String[] row = line.split("\t");
             row[0] = row[0].trim();
             movieIDs.add(row[0]);
-            if(row.length > 2)
-                System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum);
-            ProcessSingleLine_AllEnitiesPresent(row[0],row[1]);
+            if(row.length > 3)
+                System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum + " :: " + row.length);
+            try{
+                ProcessSingleLine_AllEnitiesPresent(row[0],row[2]);
+            }catch(Exception e){
+                System.out.println(line);
+            }
+            lineNum++;
         }
         System.out.println("found all linkable entities, number of lines: " + lineNum);
         bw_allEntities.flush();
@@ -162,7 +167,8 @@ public class EntityLinker {
         Trivia = Trivia.trim().toLowerCase();
         String words[] = Trivia.split(" ");
         //System.out.println("Trivia: " + Trivia);
-        //System.out.println("movie: " + movieID);         
+        //System.out.println("movie: " + movieID);
+        
         for(String entity_X: dict.get(movieID).keySet())
         {//continue if found i.e. break inner for loops
             //System.out.println("entity type: " + entity_X);
@@ -176,7 +182,8 @@ public class EntityLinker {
                     //System.out.println("Trivia Word: " + triviaWord);
                     if(Arrays.asList(candidate.split(" ")).contains(triviaWord) && !STOPWORDS.contains(triviaWord))
                     {
-                        //System.out.println("Matched: " + triviaWord + " :: " + entity_X + " :: " + candidate);
+                        //if(entity_X.equals("entity_Character"))
+                        //    System.out.println("Matched: " + triviaWord + " :: " + entity_X + " :: " + candidate);
                         bw_allEntities.write(entity_X + " ");
                         toBreak = true;
                         break;
@@ -203,7 +210,12 @@ public class EntityLinker {
         {
             String movieID = movieIDs.get(lineNum);
             lineNum++;
-            Process_Sentence(movieID, line, bw_root, "root_");
+            try{
+                Process_Sentence(movieID, line, bw_root, "root_");
+            }catch(Exception e)
+            {
+                System.out.println("here " + movieID);
+            }
         }
         System.out.println("processed for root, number of lines: " + lineNum);
         bw_root.flush();

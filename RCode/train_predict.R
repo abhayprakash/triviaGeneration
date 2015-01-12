@@ -10,7 +10,7 @@ rm(data)
 train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
-test_data <- read.csv("Test_Movies_wiki_Features.txt", header = T, sep = '\t')
+test_data <- read.csv("test_wiki_features.txt", header = T, sep = '\t')
 combined_data <- rbind(train_validate_data, test_data)
 
 # remove unused
@@ -79,7 +79,7 @@ rm(train_validate_rows, trainEnd, validateStart, train_validate_matrix, train_va
 # training
 model <- train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
 
-# getting analytics
+# getting analytics on validation set
 validate_results <- classify_model(train_validate_container, model)
 analytics <- create_analytics(train_validate_container, validate_results)
 print(analytics@algorithm_summary)
@@ -95,4 +95,4 @@ test_results <- classify_model(test_container, model)
 rm(model, test_container)
 
 #generating result file for unseen test
-write.table(test_results,"Result_rich.txt", sep='\t',row.names=F)
+write.table(test_results,"predict_rich.txt", sep='\t',row.names=F)

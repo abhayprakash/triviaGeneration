@@ -70,20 +70,20 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
-            lineNum++;
             String[] row = line.split("\t");
             row[0] = row[0].trim();
             movieIDs.add(row[0]);
             if(row.length > 2)
                 System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum);
-            Expansion_H(row[0],row[1], bw);
+            Expansion_H(lineNum, row[0],row[1], bw);
+            lineNum++;
         }
         System.out.println("found all linkable entities, number of lines: " + lineNum);
         bw.flush();
         bw.close();
     }
     
-    static void Expansion_H(String movieID,String Trivia, BufferedWriter bw) throws IOException
+    static void Expansion_H(int article_no, String movieID,String Trivia, BufferedWriter bw) throws IOException
     {
         Trivia = Trivia.trim().toLowerCase();
         String words[] = Trivia.split(" ");
@@ -100,7 +100,7 @@ public class EntityLinker {
                     if(Arrays.asList(candidate.split(" ")).contains(triviaWord) && !STOPWORDS.contains(triviaWord))
                     {
                         if(!alreadyOccured.containsKey(candidate)){
-                            bw.write(candidate + " ");
+                            bw.write(article_no + "\t" + candidate + "\n");
                             alreadyOccured.put(candidate, 1);
                         }
                         toBreak = true;
@@ -111,7 +111,6 @@ public class EntityLinker {
                     break;
             }
         }
-        bw.write("\n");
     }
     
     static void ReadDictionary() throws FileNotFoundException, IOException

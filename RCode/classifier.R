@@ -32,9 +32,9 @@ matrix <- cbind(matrix, as.matrix(data["superPOS"]))
 matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
 
 # + popularity of entities
-matrix <- cbind(matrix, as.matrix(data[,c("low_pop","med_pop","high_pop","very_high_pop")]))
+#matrix <- cbind(matrix, as.matrix(data[,c("low_pop","med_pop","high_pop","very_high_pop")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "low_pop","med_pop","high_pop","very_high_pop")
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS")#, "low_pop","med_pop","high_pop","very_high_pop")
  
 # converting frequencies to boolean presence
 for(col in addedFeatures)

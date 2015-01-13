@@ -40,6 +40,7 @@ combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["superPOS"]))
 
 # + frequency of different NERs
 combined_matrix <- cbind(combined_matrix, as.matrix(combined_data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
+rm(combined_data)
 
 addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS")
 
@@ -54,11 +55,6 @@ rm(col, index, addedFeatures)
 # tracking breakpoint
 test_start <- train_validate_rows+1
 combined_rows <- nrow(combined_matrix)
-
-# splitting combined_data
-#train_validate_data <- combined_data[1:train_validate_rows,]
-test_data <- combined_data[test_start:combined_rows,]
-rm(combined_data)
 
 # splitting combined_matrix
 train_validate_matrix <- combined_matrix[1:train_validate_rows,]
@@ -90,9 +86,29 @@ test_rows <- nrow(test_matrix)
 test_container <- create_container(test_matrix, t(test_codes), trainSize=NULL, testSize=1:test_rows, virgin=FALSE)
 rm(test_matrix, test_codes, test_rows)
 
-#prediction
+# prediction
 test_results <- classify_model(test_container, model)
 rm(model, test_container)
 
-#generating result file for unseen test
-write.table(test_results,"predict_rich.txt", sep='\t',row.names=F)
+# generating predict file for unseen test
+write.table(test_results,"try_predict_rich.txt", sep='\t',row.names=F)
+
+# result (top 10 of each movie)
+test_data <- read.csv("test_movieId_movie_trivia.txt", header = T, sep='\t')
+results <- cbind(data.frame(test_data),data.frame(test_results))
+res_1 <- results[results$SVM_LABEL == 1, ]
+res_1$MOVIE_ID <- NULL
+res_1$SVM_LABEL <- NULL
+sorted_res_1 <- res_1[order(-res_1$SVM_PROB),]
+movie_result <- split(sorted_res_1, sorted_res_1$MOVIE)
+rm(sorted_res_1, res_1, results, test_data)
+
+top10Result <- NULL
+for(i in 1:length(movie_result))
+{
+  top10Result <- rbind(data.frame(top10Result), data.frame(head(movie_result[[i]], 10)))
+}
+
+# writing result file
+top10Result$SVM_PROB <- NULL
+write.table(top10Result, "try_Result_rich.txt", sep='\t',row.names=F)

@@ -13,8 +13,19 @@ namespace TriviaGeneration
         static StreamWriter writer;
         static void Main(string[] args)
         {
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\hack_predict\movie_URL.txt";
-            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\hack_predict\entityLinks1.txt";
+            String presentFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\presentLinks.txt";
+            StreamReader pr = new StreamReader(presentFile);
+            String pLink;
+
+            HashSet<String> present = new HashSet<string>();
+
+            while ((pLink = pr.ReadLine()) != null)
+            {
+                present.Add(pLink.Trim());
+            }
+
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\movie_URL.txt";
+            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\entityLinks1.txt";
             StreamReader r = new StreamReader(fileName);
             writer = new StreamWriter(writeFile);
             string URL; int nn = 1;
@@ -23,8 +34,15 @@ namespace TriviaGeneration
                 Console.Write(nn++);
                 /*try
                 {*/
+                if (!present.Contains(URL))
+                {
                     ProcessMovie(URL);
                     Console.WriteLine(" Done: " + URL);
+                }
+                else
+                {
+                    Console.WriteLine("present");
+                }
                 /*}
                 catch (Exception e)
                 {
@@ -33,6 +51,8 @@ namespace TriviaGeneration
             }
             writer.Flush();
             writer.Close();
+            Console.WriteLine("Done");
+            Console.ReadLine();
         }
         static void ProcessMovie(String URL)
         {

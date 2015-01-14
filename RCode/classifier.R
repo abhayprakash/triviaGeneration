@@ -1,8 +1,8 @@
 library(tm)
 library(RTextTools);
-data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
-data <- data[sample(nrow(data)),]
-#load("compareData.RData")
+#data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
+#data <- data[sample(nrow(data)),]
+load("compareData.RData")
 
 #name <- data[,"MOVIE_NAME_IMDB"]
 training_data <- data["TRIVIA"]
@@ -46,6 +46,9 @@ model <- train_model(container, algorithm=c("SVM"), method = "C-classification",
 results <- classify_model(container, model)
 analytics <- create_analytics(container, results)
 print(analytics@algorithm_summary)
+
+# cross validate for accuracy
+container <- create_container(matrix, t(training_codes), trainSize=1:totalRows, testSize=NULL, virgin=FALSE)
 print(cross_validate(container, 5, "SVM"))
 
 ############# ranking for features - NOTE: works only for linear kernel

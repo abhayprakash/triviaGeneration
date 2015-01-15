@@ -1,9 +1,11 @@
 library(tm)
 library(RTextTools);
-#data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
-#data <- data[sample(nrow(data)),]
-load("compareData.RData")
+data <- read.csv("judged_movie_features.txt", sep='\t', header=T)
+data <- data[sample(nrow(data)),]
+#load("compareData.RData")
 train_validate_data <- data
+train_validate_data$MOVIE <- NULL
+train_validate_data$CLASS_V <- NULL
 rm(data)
 
 # tracking train_validate_data
@@ -111,4 +113,4 @@ for(i in 1:length(movie_result))
 
 # writing result file
 top10Result$SVM_PROB <- NULL
-write.table(top10Result, "try_Result_rich.txt", sep='\t',row.names=F)
+write.table(top10Result, "Result_rich_fromJudged.txt", sep='\t',row.names=F)

@@ -113,4 +113,4 @@ for(i in 1:length(movie_result))
 
 # writing result file
 top10Result$SVM_PROB <- NULL
-write.table(top10Result, "Result_rich_fromJudged.txt", sep='\t',row.names=F)
+write.table(top10Result, "Result_1gram_Wiki_fromJudged.txt", sep='\t',row.names=F)

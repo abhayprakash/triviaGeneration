@@ -1,8 +1,8 @@
 library(tm)
 library(RTextTools);
-#data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
-#data <- data[sample(nrow(data)),]
-load("compareData.RData")
+data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
+data <- data[sample(nrow(data)),]
+#load("compareData.RData")
 
 #name <- data[,"MOVIE_NAME_IMDB"]
 training_data <- data["TRIVIA"]
@@ -25,13 +25,14 @@ parse_features_matrix <- cbind(as.matrix(all_linked_entities_matrix), as.matrix(
 
 matrix <- cbind(as.matrix(matrix), as.matrix(parse_features_matrix))
 
-# + frequency of superlative POS as feature
+# + frequency of superlative and comparative POS as feature
 matrix <- cbind(matrix, as.matrix(data["superPOS"]))
+matrix <- cbind(matrix, as.matrix(data["compPOS"]))
 
 # + frequency of different NERs
 matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS")
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "compPOS")
 
 # converting frequencies to boolean presence
 for(col in addedFeatures)
@@ -42,7 +43,7 @@ for(col in addedFeatures)
 
 ############ training and testing
 container <- create_container(matrix, t(training_codes), trainSize=1:trainEnd, testSize=testStart:totalRows, virgin=FALSE)
-model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
+model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 5, cost = 100, kernel = "linear")
 results <- classify_model(container, model)
 analytics <- create_analytics(container, results)
 print(analytics@algorithm_summary)

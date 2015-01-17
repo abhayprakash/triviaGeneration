@@ -161,7 +161,7 @@ public class NLPFeatures {
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\judged_movie_trivia.txt";
+        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\Country_Trivia.txt";
         FileWriter fw = new FileWriter(resultFile_Root);
         bw_root = new BufferedWriter(fw);
         fw = new FileWriter(resultFile_subj);
@@ -193,7 +193,7 @@ public class NLPFeatures {
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String input;
         int lineNum = 0;
-        input = bufferReader.readLine();
+        //input = bufferReader.readLine();
         while((input = bufferReader.readLine()) != null)
         {
             processLine(input, lineNum);

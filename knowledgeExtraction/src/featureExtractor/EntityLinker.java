@@ -23,7 +23,7 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\";
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
     static String Out_rootWords = folderPath + "PRO_rootWord.txt";
     static String In_subjWords = folderPath + "INT_D_subjectWords.txt";
@@ -32,7 +32,7 @@ public class EntityLinker {
     static String Out_underRootWors = folderPath + "PRO_underRootWords.txt";
     
     static String In_entityDictionary = folderPath + "entityLinks.txt";
-    static String In_movieID_Trivia = folderPath + "judged_movieID_trivia.txt";
+    static String In_movieID_Trivia = folderPath + "Country_Trivia.txt";
     static String Out_allEntitiesPresent = folderPath + "PRO_allLinkedEntities.txt";
     static String Out_ExpandedEntities = folderPath + "PRO_ExpandedEntites.txt";
     
@@ -43,15 +43,25 @@ public class EntityLinker {
     
     static List<String> STOPWORDS = new ArrayList<String>();
     
+    static Boolean CONST_DO_LINKING = false;
+    
     public static void main(String[] args) throws IOException
     {
         String list = "a,able,about,across,after,all,almost,also,am,among,an,and,any,are,as,at,be,because,been,but,by,can,cannot,could,dear,did,do,does,either,else,ever,every,for,from,get,got,had,has,have,he,her,hers,him,his,how,however,i,if,in,into,is,it,its,just,least,let,like,likely,may,me,might,most,must,my,neither,no,nor,not,of,off,often,on,only,or,other,our,own,rather,said,say,says,she,should,since,so,some,than,that,the,their,them,then,there,these,they,this,tis,to,too,twas,us,wants,was,we,were,what,when,where,which,while,who,whom,why,will,with,would,yet,you,your";
         STOPWORDS = Arrays.asList(list.split(","));
         
-        ReadDictionary();
-        //ExpandEntityNames();
-        
-        ReadIDs_and_processAllPresentLinkedEntities();
+        if(CONST_DO_LINKING)
+        {
+            ReadDictionary();
+            //ExpandEntityNames();
+
+            ReadIDs_and_processAllPresentLinkedEntities();
+        }
+        else
+        {
+            dict.put("0", new HashMap<>());
+            dict.get("0").put("0", new ArrayList<>());
+        }
         Process_RootWords();
         Process_subjWords();
         Process_underRootWords();
@@ -155,7 +165,12 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
-            String movieID = movieIDs.get(lineNum);
+            String movieID;
+            if(CONST_DO_LINKING)
+                movieID = movieIDs.get(lineNum);
+            else
+                movieID = "0";
+            
             lineNum++;
            // try{
                 Process_Sentence(movieID, line, bw_root, "root_");
@@ -171,6 +186,9 @@ public class EntityLinker {
     
     static void Process_Sentence(String movieID, String line, BufferedWriter bw, String prefix) throws IOException
     {
+        if(!CONST_DO_LINKING)
+            movieID = "0";
+        
         String[] row = line.split("\t");
         HashMap<String, Integer> alreadyOccured = new HashMap<>();
         for(int i = 1; i < row.length; i++)
@@ -236,7 +254,12 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
-            String movieID = movieIDs.get(lineNum);
+            String movieID;
+            if(CONST_DO_LINKING)
+                movieID = movieIDs.get(lineNum);
+            else
+                movieID = "0";
+            
             lineNum++;
             Process_Sentence(movieID, line, bw_subj, "subj_");
         }
@@ -257,7 +280,12 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
-            String movieID = movieIDs.get(lineNum);
+            String movieID;
+            if(CONST_DO_LINKING)
+                movieID = movieIDs.get(lineNum);
+            else
+                movieID = "0";
+            
             lineNum++;
             Process_Sentence(movieID, line, bw_underRoot, "underRoot_");
         }

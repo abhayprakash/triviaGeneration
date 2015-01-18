@@ -40,11 +40,12 @@ import net.didion.jwnl.data.POS;
  * @author Abhay Prakash
  */
 public class NLPFeatures {
-    
-    static String resultFile_Root = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_rootWord.txt";
-    static String resultFile_underRoot = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_underRootWords.txt";
-    static String resultFile_subj = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_subjectWords.txt";
-    static String resultFile_nerTypePresence = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\INT_D_nerTypePresent.txt";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\predict\\";
+    static String inputFilePath = folderPath + "trivia.txt";
+    static String resultFile_Root = folderPath + "INT_D_rootWord.txt";
+    static String resultFile_underRoot = folderPath + "INT_D_underRootWords.txt";
+    static String resultFile_subj = folderPath + "INT_D_subjectWords.txt";
+    static String resultFile_nerTypePresence = folderPath + "INT_D_nerTypePresent.txt";
     static BufferedWriter bw_root, bw_subj, bw_underRoot, bw_nerType;
     
     static List<String> ners = new ArrayList<>();
@@ -161,7 +162,6 @@ public class NLPFeatures {
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\Country_Trivia.txt";
         FileWriter fw = new FileWriter(resultFile_Root);
         bw_root = new BufferedWriter(fw);
         fw = new FileWriter(resultFile_subj);

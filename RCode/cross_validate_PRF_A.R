@@ -18,8 +18,8 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
     pred <- predict(model, alldata[rand == i, ])
     
     # for comparision: original and predicted
-    true_labels <- as.vector(true_labels)
-    predicted_labels <- as.vector(predicted_labels, mode = class(true_labels))
+    true_labels <- as.vector(allcodes[rand == i])
+    predicted_labels <- as.vector(pred, mode = class(true_labels))
     
     # accuracy
     analyze <- predicted_labels == true_labels

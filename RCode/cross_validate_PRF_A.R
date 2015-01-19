@@ -26,7 +26,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
     cv_accuracy[i] <- length(analyze[analyze == TRUE])/length(true_labels)
     
     # precision 1 
-    correct_1 <- (predicted_labels == true_labels) && (true_labels == 1)
+    correct_1 <- (predicted_labels == true_labels) & (true_labels == 1)
     cv_p1[i] <- length(correct_1[correct_1 == TRUE])/length(predicted_labels[predicted_labels == 1])
     
     # recall 1
@@ -36,7 +36,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
     cv_f1[i] <- (2*cv_p1[i]*cv_r1[i])/(cv_p1[i]+cv_r1[i])
     
     # precision 0
-    correct_0 <- (predicted_labels == true_labels) && (true_labels == 0)
+    correct_0 <- (predicted_labels == true_labels) & (true_labels == 0)
     cv_p0[i] <- length(correct_0[correct_0 == TRUE])/length(predicted_labels[predicted_labels == 0])
     
     # recall 0

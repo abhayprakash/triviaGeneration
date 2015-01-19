@@ -49,12 +49,14 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
     cv_f0[i] <- (2*cv_p0[i]*cv_r0[i])/(cv_p0[i]+cv_r0[i])
     
     cat("Fold ", i, " Out of Sample Accuracy", " = ", cv_accuracy[i], "\n", sep = "")
-    cat("Precision 0: ", cv_p0[i], " Recall 0: ", cv_r0[i]," F 0: ", cv_f0[i], "\n", sep = "")
-    cat("Precision 1: ", cv_p1[i], " Recall 1: ", cv_r1[i]," F 1: ", cv_f1[i], "\n", sep = "")
+    cat("Precision 0: ", cv_p0[i], "  Recall 0: ", cv_r0[i],"  F 0: ", cv_f0[i], "\n", sep = "")
+    cat("Precision 1: ", cv_p1[i], "  Recall 1: ", cv_r1[i],"  F 1: ", cv_f1[i], "\n", sep = "")
+    cat("----------\n")
   }
   cat("\nMean Accuracy: ", mean(cv_accuracy), "\n")
-  cat("Mean Precison 0: ", mean(cv_p0), " Mean Recall 0: ", mean(cv_r0), "Mean F 0: ", mean(cv_f0), "\n")
-  cat("Mean Precison 1: ", mean(cv_p1), " Mean Recall 1: ", mean(cv_r1), "Mean F 1: ", mean(cv_f1), "\n")
+  cat("Mean Precison 0: ", mean(cv_p0), "  Mean Recall 0: ", mean(cv_r0), "  Mean F 0: ", mean(cv_f0), "\n")
+  cat("Mean Precison 1: ", mean(cv_p1), "  Mean Recall 1: ", mean(cv_r1), "  Mean F 1: ", mean(cv_f1), "\n")
+  cat("Average F score: ", (mean(cv_f0) + mean(cv_f1))/2)
 }
 
 data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)

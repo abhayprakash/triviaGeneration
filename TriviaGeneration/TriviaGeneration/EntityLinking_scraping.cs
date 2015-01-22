@@ -11,7 +11,7 @@ namespace TriviaGeneration
     class EntityLinking_scraping
     {
         static StreamWriter writer;
-        static void Main(string[] args)
+        static void Main22(string[] args)
         {
             String presentFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\presentLinks.txt";
             StreamReader pr = new StreamReader(presentFile);

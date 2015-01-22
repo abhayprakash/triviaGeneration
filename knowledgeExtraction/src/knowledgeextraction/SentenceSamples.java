@@ -29,11 +29,11 @@ public class SentenceSamples {
         SentenceModel model = new SentenceModel(is);
         SentenceDetectorME sdetector = new SentenceDetectorME(model);
         
-        File writeFile = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\movieTest\\movies_wiki.txt");
+        File writeFile = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\movieTest\\new_movies_wiki.txt");
         writeFile.createNewFile();
         FileWriter writer = new FileWriter(writeFile); 
 
-        String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\movieTest\\indivFiles\\";
+        String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\movieTest\\indivFiles\\new\\";
         File[] files = new File(folderPath).listFiles();
         for (File file : files) {
             if(file.isFile()){

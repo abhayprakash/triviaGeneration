@@ -1,7 +1,8 @@
 library(tm)
 library(RTextTools)
+library(e1071)
 
-cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 100, kernel = "radial")
+cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 90, kernel = "radial")
 {
   extract_label_from_prob_names <- function(x) return(rownames(as.matrix(which.max(x))))
   alldata <- rbind(container@training_matrix, container@classification_matrix)
@@ -92,7 +93,7 @@ matrix <- cbind(matrix, as.matrix(data["superPOS"]))
 matrix <- cbind(matrix, as.matrix(data["compPOS"]))
 
 # + frequency of different NERs
-matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
+matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG")]))
 
 addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "compPOS")
 
@@ -103,6 +104,14 @@ for(col in addedFeatures)
   matrix[index,col] <- 1
 }
 
+index <- (matrix[,"FOG"] < 8)
+matrix[index, "FOG"] <- 1
+
+index <- (matrix[,"FOG"] >= 8)
+matrix[index,"FOG"] <- 2
+
+index <- (matrix[,"FOG"] >= 13)
+matrix[index,"FOG"] <- 3
 ############ training and testing
 container <- create_container(matrix, t(training_codes), trainSize=1:trainEnd, testSize=testStart:totalRows, virgin=FALSE)
 cross_validate_SVM_PRFA(container, 5, "SVM", kernel = "linear")

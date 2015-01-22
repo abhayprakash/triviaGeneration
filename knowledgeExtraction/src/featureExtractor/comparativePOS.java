@@ -37,7 +37,7 @@ public class comparativePOS {
     static StanfordCoreNLP pipeline;
     static BufferedWriter bw;
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
-        String resultComp = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\resultComp_POS.txt";
+        String resultComp = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\resultComp_POS.txt";
         FileWriter fw = new FileWriter(resultComp);
         bw = new BufferedWriter(fw);
         
@@ -45,7 +45,7 @@ public class comparativePOS {
         props.put("annotators", "tokenize, ssplit, pos");
         pipeline = new StanfordCoreNLP(props);
         
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\Country_Trivia.txt";
+        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\hack_predict\\testMovies_wiki_trivia.txt";
         FileReader inputFile = new FileReader(inputFilePath);
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String input;

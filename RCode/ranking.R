@@ -19,6 +19,9 @@ train_validate_data$LIKENESS_RATIO <- NULL
 train_validate_data$FOG <- NULL
 train_validate_data$RANK <- NULL
 
+# removing unused
+rm(data)
+
 # name change of a column
 names(train_validate_data)[names(train_validate_data) == 'MOVIE_NAME_IMDB'] <- 'MOVIE'
 
@@ -27,15 +30,18 @@ train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
 test_data <- read.csv("test_wiki_features.txt", header = T, sep = '\t')
-#test_data$MOVIE <- NULL
 test_data$FOG_INDEX <- NULL
 combined_data <- rbind(train_validate_data, test_data)
+
+# romoving unused
+rm(test_data, train_validate_data)
 
 combined_trivia <- combined_data["TRIVIA"]
 combined_codes <- combined_data["CLASS"]
 
 # Unigram words: combined for train, validate and test
 combined_matrix <- create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
+rm(combined_trivia)
 
 # parse tree features: combined for train, validate and test
 root_matrix <- create_matrix(combined_data["ROOT_WORDS"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
@@ -45,6 +51,7 @@ all_linked_entities_matrix <- create_matrix(combined_data["ALL_LINKABLE_ENTITIES
 parse_features_matrix <- cbind(as.matrix(all_linked_entities_matrix), as.matrix(root_matrix), as.matrix(subject_matrix), as.matrix(under_root_matrix))
 
 combined_matrix <- cbind(as.matrix(combined_matrix), as.matrix(parse_features_matrix))
+rm(parse_features_matrix, all_linked_entities_matrix, under_root_matrix, subject_matrix, root_matrix)
 
 # + frequency of superlative POS and comparative POS as features
 combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["superPOS"]))
@@ -62,13 +69,15 @@ for(col in addedFeatures)
   combined_matrix[index,col] <- 1
 }
 
+rm(addedFeatures, col, index)
+
 # tracking breakpoint
 test_start <- train_validate_rows+1
 combined_rows <- nrow(combined_matrix)
 
 # splitting combined_matrix
 train_validate_matrix <- combined_matrix[1:train_validate_rows,]
-test_matrix <- combined_matrix[test_start:combined_rows,]
+test_matrix <- data.frame(combined_matrix[test_start:combined_rows,])
 
 # splitting combined_codes
 train_validate_codes <- combined_codes[1:train_validate_rows,]
@@ -80,11 +89,13 @@ validateStart <- trainEnd + 1
 #train_validate_container <- create_container(train_validate_matrix, t(train_validate_codes), trainSize=1:trainEnd, testSize=validateStart:train_validate_rows, virgin=FALSE)
 
 comMAT <- data.frame(cbind(train_validate_matrix, train_validate_codes))
-trainMAT <- data.frame(comMAT[1:trainEnd,])
-validateMAT <- data.frame(comMAT[validateStart:train_validate_rows,])
+#trainMAT <- data.frame(comMAT[1:trainEnd,])
+#validateMAT <- data.frame(comMAT[validateStart:train_validate_rows,])
 
 # training
 #model <- train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
+
+rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_codes, train_validate_matrix, train_validate_rows, trainEnd, validateStart)
 
 ndcg <- function(x) {
   # x is a vector of relevance scores
@@ -93,13 +104,14 @@ ndcg <- function(x) {
   DCG(x)/DCG(ideal_x)
 }
 
+comMAT$MOVIE <- NULL
 gbmModel<-gbm( train_validate_codes ~ .
-               , data = trainMAT
+               , data = comMAT
                #, distribution="bernoulli"
                , distribution = list( # loss function:
                  name='pairwise', # pairwise
                  metric="ndcg", # ranking metric: normalized discounted cumulative gain
-                 group='MOVIE',
+                 #group='MOVIE',
                  max.rank=5),
                , n.trees=100
                , interaction.depth = 8
@@ -109,4 +121,5 @@ gbmModel<-gbm( train_validate_codes ~ .
                , train.fraction = 0.8,
                , verbose=TRUE)
 
-results<-predict(gbmModel,validateMAT,n.trees=gbmModel$n.trees,type="response")
+test_matrix$MOVIE<-NULL
+results<-predict(gbmModel,test_matrix,n.trees=gbmModel$n.trees,type="response")

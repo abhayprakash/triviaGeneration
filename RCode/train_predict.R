@@ -10,12 +10,21 @@ train_validate_data$MOVIE <- NULL
 train_validate_data$CLASS_V <- NULL
 train_validate_data$MOVIE_NAME_IMDB <- NULL
 
+# for multiclass
+train_validate_data$CLASS <- train_validate_data$RANK
+train_validate_data$RANK <- NULL
+train_validate_data$INTERESTED <- NULL
+train_validate_data$VOTED <- NULL
+train_validate_data$LIKENESS_RATIO <- NULL
+train_validate_data$FOG <- NULL
+
 # tracking train_validate_data
 train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
 test_data <- read.csv("test_wiki_features.txt", header = T, sep = '\t')
 test_data$MOVIE <- NULL
+test_data$FOG_INDEX <- NULL
 combined_data <- rbind(train_validate_data, test_data)
 
 #name <- data[,"MOVIE_NAME_IMDB"]
@@ -36,12 +45,12 @@ combined_matrix <- cbind(as.matrix(combined_matrix), as.matrix(parse_features_ma
 
 # + frequency of superlative POS and comparative POS as features
 combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["superPOS"]))
-combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["compPOS"]))
+#combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["compPOS"]))
 
 # + frequency of different NERs
 combined_matrix <- cbind(combined_matrix, as.matrix(combined_data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "compPOS")
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS") #, "compPOS")
 
 # converting frequencies to boolean presence
 for(col in addedFeatures)
@@ -87,14 +96,11 @@ test_data <- read.csv("test_wiki_features.txt", header = T, sep='\t')
 results <- cbind(data.frame(test_data),data.frame(test_results))
 
 # generating predict file for unseen test
-write.table(results,"predicted_rich.txt", sep='\t',row.names=F)
+write.table(results,"predicted_classify_4class.txt", sep='\t',row.names=F)
 
 # only top 10 trivia of selected movies
-res_1 <- results[results$SVM_LABEL == 1, ]
-res_1$MOVIE_ID <- NULL
-res_1$SVM_LABEL <- NULL
-sorted_res_1 <- res_1[order(-res_1$SVM_PROB),]
-movie_result <- split(sorted_res_1, sorted_res_1$MOVIE)
+sorted_results <- results[order(results$SVM_LABEL,-results$SVM_PROB),]
+movie_result <- split(sorted_results, sorted_results$MOVIE)
 
 top10Result <- NULL
 for(i in 1:length(movie_result))
@@ -103,5 +109,4 @@ for(i in 1:length(movie_result))
 }
 
 # writing result file
-top10Result$SVM_PROB <- NULL
-write.table(top10Result, "result_strongNeg_compPOS.txt", sep='\t',row.names=F)
+write.table(top10Result, "result_classify_4Class.txt", sep='\t',row.names=F)

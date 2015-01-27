@@ -3,8 +3,8 @@ library(RTextTools)
 library(e1071)
 library(gbm)
 
-data <- read.csv("trainData_5K_richFeatures_rank.txt", sep='\t', header=T)
-data <- data[sample(nrow(data)),]
+data <- read.csv("trainData_variation_rank.txt", sep='\t', header=T)
+#data <- data[sample(nrow(data)),]
 
 train_validate_data <- data
 
@@ -18,6 +18,7 @@ train_validate_data$VOTED <- NULL
 train_validate_data$LIKENESS_RATIO <- NULL
 train_validate_data$FOG <- NULL
 train_validate_data$RANK <- NULL
+train_validate_data$Movie.Roll.Num <- NULL
 
 # removing unused
 rm(data)
@@ -33,7 +34,7 @@ test_data <- read.csv("test_wiki_features.txt", header = T, sep = '\t')
 test_data$FOG_INDEX <- NULL
 combined_data <- rbind(train_validate_data, test_data)
 
-# romoving unused
+# removing unused
 rm(test_data, train_validate_data)
 
 combined_trivia <- combined_data["TRIVIA"]
@@ -88,14 +89,17 @@ trainEnd <- round((4*train_validate_rows)/5)
 validateStart <- trainEnd + 1
 #train_validate_container <- create_container(train_validate_matrix, t(train_validate_codes), trainSize=1:trainEnd, testSize=validateStart:train_validate_rows, virgin=FALSE)
 
+rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_codes, train_validate_matrix, train_validate_rows, trainEnd, validateStart)
+
 comMAT <- data.frame(cbind(train_validate_matrix, train_validate_codes))
-#trainMAT <- data.frame(comMAT[1:trainEnd,])
-#validateMAT <- data.frame(comMAT[validateStart:train_validate_rows,])
+trainMAT <- data.frame(comMAT[1:trainEnd,])
+validateMAT <- data.frame(comMAT[validateStart:train_validate_rows,])
 
 # training
 #model <- train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
 
-rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_codes, train_validate_matrix, train_validate_rows, trainEnd, validateStart)
+# following is the code for pairwise ranking by gbm in r, but with so high dimension, systems were giving stackoverflow error.
+# Finally we used binaries of svm rank and other ranking models
 
 ndcg <- function(x) {
   # x is a vector of relevance scores
@@ -104,14 +108,13 @@ ndcg <- function(x) {
   DCG(x)/DCG(ideal_x)
 }
 
-comMAT$MOVIE <- NULL
 gbmModel<-gbm( train_validate_codes ~ .
                , data = comMAT
                #, distribution="bernoulli"
                , distribution = list( # loss function:
                  name='pairwise', # pairwise
                  metric="ndcg", # ranking metric: normalized discounted cumulative gain
-                 #group='MOVIE',
+                 group='MOVIE',
                  max.rank=5),
                , n.trees=100
                , interaction.depth = 8
@@ -121,5 +124,4 @@ gbmModel<-gbm( train_validate_codes ~ .
                , train.fraction = 0.8,
                , verbose=TRUE)
 
-test_matrix$MOVIE<-NULL
 results<-predict(gbmModel,test_matrix,n.trees=gbmModel$n.trees,type="response")

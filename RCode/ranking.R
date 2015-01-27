@@ -77,7 +77,7 @@ test_start <- train_validate_rows+1
 combined_rows <- nrow(combined_matrix)
 
 # splitting combined_matrix
-train_validate_matrix <- combined_matrix[1:train_validate_rows,]
+train_validate_matrix <- data.frame(combined_matrix[1:train_validate_rows,])
 test_matrix <- data.frame(combined_matrix[test_start:combined_rows,])
 
 # splitting combined_codes
@@ -87,7 +87,6 @@ test_codes <- combined_codes[test_start:combined_rows,]
 # preparing container for training and validating data
 trainEnd <- round((4*train_validate_rows)/5)
 validateStart <- trainEnd + 1
-#train_validate_container <- create_container(train_validate_matrix, t(train_validate_codes), trainSize=1:trainEnd, testSize=validateStart:train_validate_rows, virgin=FALSE)
 
 rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_codes, train_validate_matrix, train_validate_rows, trainEnd, validateStart)
 
@@ -95,11 +94,25 @@ comMAT <- data.frame(cbind(train_validate_matrix, train_validate_codes))
 trainMAT <- data.frame(comMAT[1:trainEnd,])
 validateMAT <- data.frame(comMAT[validateStart:train_validate_rows,])
 
-# training
-#model <- train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 100, kernel = "linear")
+# writing feature matrix for train set and validate set for doing metrics by 5 fold cv 
+write.table(trainMAT, "train_features.txt", sep = '\t', quote = F, row.names=F)
+write.table(validateMAT, "validate_features.txt", sep = '\t', quote = F, row.names=F)
 
-# following is the code for pairwise ranking by gbm in r, but with so high dimension, systems were giving stackoverflow error.
-# Finally we used binaries of svm rank and other ranking models
+# writing test set features
+write.table(test_matrix, "test_features.txt", sep = '\t', quote = F, row.names=F)
+
+# call binaries to generate results
+
+# read result file on validation set
+
+# match rankings and get ndcg@10 or MAP@10
+
+
+########################################################################
+# Following is the code for pairwise ranking by gbm in r,              #
+# but with so high dimension, systems were giving stackoverflow error. #
+# Finally we used binaries of different ranking models like svm rank   #
+########################################################################
 
 ndcg <- function(x) {
   # x is a vector of relevance scores

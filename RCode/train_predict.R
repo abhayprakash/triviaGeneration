@@ -19,7 +19,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model <- NULL
   
   for (i in sort(unique(rand))) {
-    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], method = method, cross = cross, cost = cost, kernel = kernel)
+    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], method = method, cross = cross, cost = cost, kernel = kernel, probability = TRUE)
     pred <- predict(model, alldata[rand == i, ])
     
     # for comparision: original and predicted
@@ -62,7 +62,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model
 }
 
-train_validate_data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
+train_validate_data <- read.csv("train_data.txt", sep='\t', header=T)
 train_validate_data <- train_validate_data[sample(nrow(train_validate_data)),]
 
 # for multiclass
@@ -75,7 +75,7 @@ train_validate_data$LIKENESS_RATIO <- NULL
 train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
-test_data <- read.csv("test_set.txt", header = T, sep = '\t')
+test_data <- read.csv("test_set_clean.txt", header = T, sep = '\t')
 test_data$MOVIE <- NULL
 test_data$count_boring <- NULL
 test_data$count_interesting <- NULL
@@ -105,9 +105,9 @@ combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["superPOS"]))
 #combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["compPOS"]))
 
 # + frequency of different NERs
-combined_matrix <- cbind(combined_matrix, as.matrix(combined_data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG")]))
+combined_matrix <- cbind(combined_matrix, as.matrix(combined_data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG", "Contradict")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS") #, "compPOS")
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "Contradict")#, "compPOS")
 
 # converting frequencies to boolean presence
 for(col in addedFeatures)
@@ -116,14 +116,14 @@ for(col in addedFeatures)
   combined_matrix[index,col] <- 1
 }
 
-index <- (matrix[,"FOG"] < 7)
-matrix[index, "FOG"] <- as.factor(1)
+index <- (combined_matrix[,"FOG"] < 7)
+combined_matrix[index, "FOG"] <- as.factor(1)
 
-index <- (matrix[,"FOG"] >= 7)
-matrix[index,"FOG"] <- as.factor(2)
+index <- (combined_matrix[,"FOG"] >= 7)
+combined_matrix[index,"FOG"] <- as.factor(2)
 
-index <- (matrix[,"FOG"] >= 15)
-matrix[index,"FOG"] <- as.factor(3)
+index <- (combined_matrix[,"FOG"] >= 15)
+combined_matrix[index,"FOG"] <- as.factor(3)
 
 # tracking breakpoint
 test_start <- train_validate_rows+1
@@ -145,11 +145,6 @@ train_validate_container <- create_container(train_validate_matrix, t(train_vali
 # training
 model <- cross_validate_SVM_PRFA(train_validate_container, 5, "SVM", kernel = "linear")#train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 90, kernel = "linear")
 
-# getting analytics on validation set
-validate_results <- classify_model(train_validate_container, model)
-analytics <- create_analytics(train_validate_container, validate_results)
-print(analytics@algorithm_summary)
-
 # preparing container for test data
 test_rows <- nrow(test_matrix)
 test_container <- create_container(test_matrix, t(test_codes), trainSize=NULL, testSize=1:test_rows, virgin=FALSE)
@@ -158,11 +153,11 @@ test_container <- create_container(test_matrix, t(test_codes), trainSize=NULL, t
 test_results <- classify_model(test_container, model)
 
 # result all
-test_data <- read.csv("test_set.txt", header = T, sep='\t')
+test_data <- read.csv("test_set_clean.txt", header = T, sep='\t')
 results <- cbind(data.frame(test_data),data.frame(test_results))
 
 # generating predict file for unseen test
-write.table(results,"predicted_classify_1_0_1g_IMb_heuristic.txt", sep='\t',row.names=F)
+#write.table(results,"predicted_classify_1_0_rich_IMb_heuristic.txt", sep='\t',row.names=F)
 
 # getting performance
 true_labels <- as.vector(results$CLASS)
@@ -201,4 +196,4 @@ precision_in_10 <- total_correct_in_10/length(unique(sorted_results$MOVIE))
 cat("p@10 : ", precision_in_10)
 
 # writing result file
-write.table(top10Result, "top10_1_0_1g_classification.txt", sep='\t',row.names=F)
+#write.table(top10Result, "top10_1_0_rich_classification.txt", sep='\t',row.names=F)

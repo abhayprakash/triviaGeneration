@@ -2,7 +2,7 @@ library(tm)
 library(RTextTools)
 library(e1071)
 
-cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 90, kernel = "radial")
+cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 100, kernel = "radial")
 {
   extract_label_from_prob_names <- function(x) return(rownames(as.matrix(which.max(x))))
   alldata <- rbind(container@training_matrix, container@classification_matrix)
@@ -16,6 +16,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   cv_p0 <- NULL
   cv_r0 <- NULL
   cv_f0 <- NULL
+  model <- NULL
   
   for (i in sort(unique(rand))) {
     model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], method = method, cross = cross, cost = cost, kernel = kernel)
@@ -57,7 +58,8 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   cat("\nMean Accuracy: ", mean(cv_accuracy), "\n")
   cat("Mean Precison 0: ", mean(cv_p0), "  Mean Recall 0: ", mean(cv_r0), "  Mean F 0: ", mean(cv_f0), "\n")
   cat("Mean Precison 1: ", mean(cv_p1), "  Mean Recall 1: ", mean(cv_r1), "  Mean F 1: ", mean(cv_f1), "\n")
-  cat("Average F score: ", (mean(cv_f0) + mean(cv_f1))/2)
+  cat("Average F score: ", (mean(cv_f0) + mean(cv_f1))/2);
+  model
 }
 
 data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
@@ -84,6 +86,7 @@ under_root_matrix <- create_matrix(data["UNDER_ROOT_WORDS"], removePunctuation =
 all_linked_entities_matrix <- create_matrix(data["ALL_LINKABLE_ENTITIES_PRESENT"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
 parse_features_matrix <- cbind(as.matrix(all_linked_entities_matrix), as.matrix(root_matrix), as.matrix(subject_matrix), as.matrix(under_root_matrix))
 
+# uncomment if don't need exact linking
 #parse_features_matrix <- cbind(as.matrix(root_matrix), as.matrix(subject_matrix), as.matrix(under_root_matrix))
 
 matrix <- cbind(as.matrix(matrix), as.matrix(parse_features_matrix))
@@ -93,9 +96,9 @@ matrix <- cbind(matrix, as.matrix(data["superPOS"]))
 matrix <- cbind(matrix, as.matrix(data["compPOS"]))
 
 # + frequency of different NERs
-matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG")]))
+matrix <- cbind(matrix, as.matrix(data[,c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG", "Contradict")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "compPOS")
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "Contradict")#, "compPOS")
 
 # converting frequencies to boolean presence
 for(col in addedFeatures)
@@ -104,17 +107,22 @@ for(col in addedFeatures)
   matrix[index,col] <- 1
 }
 
-index <- (matrix[,"FOG"] < 8)
-matrix[index, "FOG"] <- 1
+index <- (matrix[,"FOG"] < 7)
+matrix[index, "FOG"] <- as.factor(1)
 
-index <- (matrix[,"FOG"] >= 8)
-matrix[index,"FOG"] <- 2
+index <- (matrix[,"FOG"] >= 7)
+matrix[index,"FOG"] <- as.factor(2)
 
-index <- (matrix[,"FOG"] >= 13)
-matrix[index,"FOG"] <- 3
+index <- (matrix[,"FOG"] >= 15)
+matrix[index,"FOG"] <- as.factor(3)
+
 ############ training and testing
 container <- create_container(matrix, t(training_codes), trainSize=1:trainEnd, testSize=testStart:totalRows, virgin=FALSE)
-cross_validate_SVM_PRFA(container, 5, "SVM", kernel = "linear")
+model <- cross_validate_SVM_PRFA(container, 5, "SVM", kernel = "linear")
+
+  # svm tuning
+  obj <- tune ("svm", train.x = container@training_matrix, train.y = container@training_codes, validation.x = container@classification_matrix,
+               validation.y = container@testing_codes, cost = 10^(0:3))
 
   # only on 1 of the folds
   model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 5, cost = 100, kernel = "linear")

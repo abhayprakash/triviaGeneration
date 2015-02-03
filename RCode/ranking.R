@@ -6,7 +6,9 @@ TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
-train_validate_data$Movie.Roll.Num <- NULL
+
+# removing non required columns
+#train_validate_data$Movie.Roll.Num <- NULL
 train_validate_data$INTERESTED <- NULL
 train_validate_data$VOTED <- NULL
 train_validate_data$LIKENESS_RATIO <- NULL
@@ -23,10 +25,7 @@ test_data$count_boring <- NULL
 test_data$count_interesting <- NULL
 test_data$count_veryInteresting <- NULL
 
-combined_data <- rbind(train_validate_data, test_data)
-
-# removing unused
-rm(test_data, train_validate_data)
+combined_data <- rbind(train_validate_data[,!(colnames(train_validate_data) == "Movie.Roll.Num")], test_data)
 
 combined_trivia <- combined_data["TRIVIA"]
 combined_codes <- combined_data["GRADE"]
@@ -84,67 +83,82 @@ test_matrix <- data.frame(combined_matrix[test_start:combined_rows,])
 train_validate_codes <- combined_codes[1:train_validate_rows,]
 test_codes <- combined_codes[test_start:combined_rows,]
 
-# preparing container for training and validating data
-trainEnd <- floor((4*train_validate_rows)/5)
-validateStart <- trainEnd + 1
-
+# matrix for all known result rows
 comMAT <- data.frame(cbind(train_validate_matrix, train_validate_codes))
-trainMAT <- data.frame(comMAT[1:trainEnd,])
-validateMAT <- data.frame(comMAT[validateStart:train_validate_rows,])
-
 rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_matrix)
 
-# writing feature matrix for train set and validate set for doing metrics by 5 fold cv 
-write.table(trainMAT, "train_features.txt", sep = '\t', quote = F, row.names=F)
-write.table(validateMAT, "validate_features.txt", sep = '\t', quote = F, row.names=F)
-write.table(comMAT, "all_train_features.txt", sep = '\t', quote = F, row.names=F)
+# Cross validating within known result set -----------------
+total_P_in_10 = 0;
+num_times = 5;
+for(i in 1:num_times)
+{
+  # forming validate set (50 movies -> all trivia)
+  allMovies <- unique(train_validate_data$Movie.Roll.Num)
+  numMovies <- length(allMovies)
+  validateMovies_roll_num <- sample(1:numMovies, 50, replace = FALSE)
+  trainMovies_roll_num <- setdiff(allMovies, validateMovies_roll_num)
+  validate_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
+  train_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
 
-# writing test set features
+  # preparing container for training and validating data
+  trainMAT <- data.frame(comMAT[train_index,])
+  validateMAT <- data.frame(comMAT[validate_index,])
+
+  # writing feature matrix for train set and validate set 
+  write.table(trainMAT, "train_features.txt", sep = '\t', quote = F, row.names=F)
+  write.table(validateMAT, "validate_features.txt", sep = '\t', quote = F, row.names=F)
+
+  # call svmlight_format writer
+  system('java svmLight_FormatWriter train_features.txt train_features_svmLight.txt');
+  system('java svmLight_FormatWriter validate_features.txt validate_features_svmLight.txt');
+
+  # create model from train part
+  system('./svm_rank_learn.exe -c 3 train_features_svmLight.txt model_rank_1_4_IMDb')
+  
+  # predict on validate part
+  system('./svm_rank_classify.exe validate_features_svmLight.txt model_rank_1_4_IMDb validation_predicted_rank_1_4.txt')
+  
+  # compare for validate part : predicted v/s actual
+  predicted_validate <- read.csv("validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
+  train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
+  validate_data <- train_validate_data[validate_index,]
+  result_validate <- cbind(validate_data, predicted_validate)
+  
+  # metric on validation set predictions
+  sorted_result <- result_validate[order(-result_validate$V1),]
+  movie_result <- split(sorted_result, sorted_result$MOVIE)
+  
+  top10Result <- NULL
+  total_correct_in_10 <- 0
+  for(i in 1:length(movie_result))
+  {
+    top10Result <- rbind(data.frame(top10Result), data.frame(head(movie_result[[i]], 10)))
+    thisMovie <- data.frame(head(movie_result[[i]], 10))
+    correct_in_10 <- sum(thisMovie$CLASS)
+    total_correct_in_10 <- total_correct_in_10 + correct_in_10
+  }
+  precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
+  cat("p@10 : ", precision_in_10)
+  total_P_in_10 = total_P_in_10 + precision_in_10;
+}
+cat("Avg. P@10 on 53 movies: ", total_P_in_10/num_times)
+
+# Final prediction on unseen test -------------------------
+#writing features in table format
+write.table(comMAT, "all_train_features.txt", sep = '\t', quote = F, row.names=F)
 write.table(test_matrix, "test_features.txt", sep = '\t', quote = F, row.names=F)
 
-# call svmlight_format writer
-system('java svmLight_FormatWriter train_features.txt train_features_svmLight.txt');
-system('java svmLight_FormatWriter validate_features.txt validate_features_svmLight.txt');
+# converting to svm light format
 system('java svmLight_FormatWriter test_features.txt test_features_svmLight.txt');
 system('java svmLight_FormatWriter all_train_features.txt all_train_features_svmLight.txt');
 
 # removing unused
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
-# create model from train part
-system('./svm_rank_learn.exe -c 3 train_features_svmLight.txt model_rank_1_4_IMDb')
-
 # creating model with all available data
 system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
 
-# predict on validate part
-system('./svm_rank_classify.exe validate_features_svmLight.txt model_rank_1_4_IMDb validation_predicted_rank_1_4.txt')
-
-# compare for validate part : predicted v/s actual
-predicted_validate <- read.csv("validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
-train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
-validate_data <- train_validate_data[validateStart:train_validate_rows,]
-result_validate <- cbind(validate_data, predicted_validate)
-
-# metric on validation set predictions
-sorted_result <- result_validate[order(-result_validate$V1),]
-movie_result <- split(sorted_result, sorted_result$MOVIE)
-
-top10Result <- NULL
-total_correct_in_10 <- 0
-for(i in 1:length(movie_result))
-{
-  top10Result <- rbind(data.frame(top10Result), data.frame(head(movie_result[[i]], 10)))
-  thisMovie <- data.frame(head(movie_result[[i]], 10))
-  correct_in_10 <- sum(thisMovie$CLASS)
-  total_correct_in_10 <- total_correct_in_10 + correct_in_10
-}
-precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
-cat("p@10 : ", precision_in_10)
-
-#-------
-
-# predict on test set # use non validate portion and check
+# predict on test set
 system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
 
 # generate result file for test set

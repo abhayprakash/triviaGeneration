@@ -88,14 +88,15 @@ comMAT <- data.frame(cbind(train_validate_matrix, train_validate_codes))
 rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_matrix)
 
 # Cross validating within known result set -----------------
-total_P_in_10 = 0;
 num_times = 5;
+indiv_p <- NULL;
+total_P_in_10 = 0;
 for(i in 1:num_times)
 {
   # forming validate set (50 movies -> all trivia)
   allMovies <- unique(train_validate_data$Movie.Roll.Num)
   numMovies <- length(allMovies)
-  validateMovies_roll_num <- sample(1:numMovies, 50, replace = FALSE)
+  validateMovies_roll_num <- sample(1:numMovies, 20, replace = FALSE)
   trainMovies_roll_num <- setdiff(allMovies, validateMovies_roll_num)
   validate_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
   train_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
@@ -139,8 +140,10 @@ for(i in 1:num_times)
   }
   precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
   cat("p@10 : ", precision_in_10)
+  indiv_p <- c(indiv_p, precision_in_10)
   total_P_in_10 = total_P_in_10 + precision_in_10;
 }
+print(indiv_p);
 cat("Avg. P@10 on 53 movies: ", total_P_in_10/num_times)
 
 # Final prediction on unseen test -------------------------
@@ -159,7 +162,9 @@ rm(comMAT, test_matrix, trainMAT, validateMAT)
 system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
 
 # predict on test set
+#system('./svm_rank_classify.exe test_features_svmLight.txt model_rank_1_4_IMDb test_predicted_rank_1_4.txt')
 system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
+
 
 # generate result file for test set
 test_file <- read.csv(TEST_DATA_FILE_NAME, sep = '\t', header = TRUE)

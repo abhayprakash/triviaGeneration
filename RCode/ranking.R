@@ -1,8 +1,11 @@
 library(tm)
 library(RTextTools)
 
+TRAIN_DATA_FILE_NAME <- "trainData_variation_rank_1_4.txt";
+TEST_DATA_FILE_NAME <- "test_set_clean.txt";
+
 #reading and selecting columns in train set
-train_validate_data <- read.csv("trainData_variation_rank_1_4.txt", sep='\t', header=T)
+train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
 train_validate_data$Movie.Roll.Num <- NULL
 train_validate_data$INTERESTED <- NULL
 train_validate_data$VOTED <- NULL
@@ -15,7 +18,7 @@ names(train_validate_data)[names(train_validate_data) == 'MOVIE_NAME_IMDB'] <- '
 train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
-test_data <- read.csv("test_set_extremely_clean.txt", header = T, sep = '\t')
+test_data <- read.csv(TEST_DATA_FILE_NAME, header = T, sep = '\t')
 test_data$count_boring <- NULL
 test_data$count_interesting <- NULL
 test_data$count_veryInteresting <- NULL
@@ -119,20 +122,38 @@ system('./svm_rank_classify.exe validate_features_svmLight.txt model_rank_1_4_IM
 
 # compare for validate part : predicted v/s actual
 predicted_validate <- read.csv("validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
-train_validate_codes <- data.frame(train_validate_codes)
-actual_validate <- train_validate_codes[validateStart:train_validate_rows,]
-compare_validate <- cbind(actual_validate, predicted_validate)
+train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
+validate_data <- train_validate_data[validateStart:train_validate_rows,]
+result_validate <- cbind(validate_data, predicted_validate)
 
-# predict on test set
+# metric on validation set predictions
+sorted_result <- result_validate[order(-result_validate$V1),]
+movie_result <- split(sorted_result, sorted_result$MOVIE)
+
+top10Result <- NULL
+total_correct_in_10 <- 0
+for(i in 1:length(movie_result))
+{
+  top10Result <- rbind(data.frame(top10Result), data.frame(head(movie_result[[i]], 10)))
+  thisMovie <- data.frame(head(movie_result[[i]], 10))
+  correct_in_10 <- sum(thisMovie$CLASS)
+  total_correct_in_10 <- total_correct_in_10 + correct_in_10
+}
+precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
+cat("p@10 : ", precision_in_10)
+
+#-------
+
+# predict on test set # use non validate portion and check
 system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
 
 # generate result file for test set
-test_file <- read.csv("test_set_extremely_clean.txt", sep = '\t', header = TRUE)
+test_file <- read.csv(TEST_DATA_FILE_NAME, sep = '\t', header = TRUE)
 predicted_test <- read.csv("test_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
 result_all <- cbind(test_file, predicted_test)
 
 # writing all the sentences in test set
-write.table(result_all, "result_all_extremely_clean.txt", sep = '\t', row.names = F, quote = F)
+write.table(result_all, "result_all_clean.txt", sep = '\t', row.names = F, quote = F)
 
 # getting top 10 from each
 sorted_result <- result_all[order(-result_all$V1),]
@@ -151,4 +172,4 @@ precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
 cat("p@10 : ", precision_in_10)
 
 # writing result file
-write.table(top10Result, "temp_result_top10_rank_svm_test_set_extremely_clean.txt", sep='\t',row.names=F)
+write.table(top10Result, "temp_result_top10_rank_svm_test_set_clean.txt", sep='\t',row.names=F)

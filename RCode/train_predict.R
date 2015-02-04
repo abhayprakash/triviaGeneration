@@ -156,7 +156,7 @@ test_container <- create_container(test_matrix, t(test_codes), trainSize=NULL, t
 test_results <- classify_model(test_container, model)
 
 # result all
-test_data <- read.csv("test_set.txt", header = T, sep='\t')
+test_data <- read.csv(TEST_DATA_FILE_NAME, header = T, sep='\t')
 results <- cbind(data.frame(test_data),data.frame(test_results))
 
 # generating predict file for unseen test

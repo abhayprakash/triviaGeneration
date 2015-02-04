@@ -5,7 +5,7 @@ library(e1071)
 TRAIN_DATA_FILE_NAME <- "train_data.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
-cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 100, kernel = "radial")
+cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification",gamma=0.001, cross = 0, cost = 100, kernel = "radial")
 {
   extract_label_from_prob_names <- function(x) return(rownames(as.matrix(which.max(x))))
   alldata <- rbind(container@training_matrix, container@classification_matrix)
@@ -22,7 +22,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model <- NULL
   
   for (i in sort(unique(rand))) {
-    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], gamma=0.001, method = method, cross = cross, cost = cost, kernel = kernel, probability = TRUE)
+    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], gamma=gamma, method = method, cross = cross, cost = cost, kernel = kernel, probability = TRUE)
     pred <- predict(model, alldata[rand == i, ])
     
     # for comparision: original and predicted
@@ -146,7 +146,7 @@ validateStart <- trainEnd + 1
 train_validate_container <- create_container(train_validate_matrix, t(train_validate_codes), trainSize=1:trainEnd, testSize=validateStart:train_validate_rows, virgin=FALSE)
 
 # training
-model <- cross_validate_SVM_PRFA(train_validate_container, 5, "SVM", kernel = "radial")#train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 90, kernel = "linear")
+model <- cross_validate_SVM_PRFA(train_validate_container, 5, "SVM", kernel = "linear")#train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 90, kernel = "linear")
 
 # preparing container for test data
 test_rows <- nrow(test_matrix)

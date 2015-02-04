@@ -5,7 +5,7 @@ library(e1071)
 TRAIN_DATA_FILE_NAME <- "train_data_4k.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
-cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 100, kernel = "radial")
+cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", gamma = 0.001, cross = 0, cost = 100, kernel = "radial")
 {
   extract_label_from_prob_names <- function(x) return(rownames(as.matrix(which.max(x))))
   alldata <- rbind(container@training_matrix, container@classification_matrix)

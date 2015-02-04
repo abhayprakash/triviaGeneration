@@ -2,7 +2,7 @@ library(tm)
 library(RTextTools)
 
 TRAIN_DATA_FILE_NAME <- "trainData_variation_rank_1_4.txt";
-TEST_DATA_FILE_NAME <- "test_set.txt";
+TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
@@ -96,7 +96,7 @@ for(i in 1:num_times)
   # forming validate set (50 movies -> all trivia)
   allMovies <- unique(train_validate_data$Movie.Roll.Num)
   numMovies <- length(allMovies)
-  validateMovies_roll_num <- sample(1:numMovies, 20, replace = FALSE)
+  validateMovies_roll_num <- sample(1:numMovies, 111, replace = FALSE)
   trainMovies_roll_num <- setdiff(allMovies, validateMovies_roll_num)
   validate_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
   train_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num

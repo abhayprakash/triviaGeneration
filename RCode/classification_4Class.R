@@ -211,5 +211,5 @@ row.names(featureWeights) <- 1:nrow(featureWeights)
 zeroFeatures <- colnames(train_validate_matrix)[-w@ja]
 
 # get rank of features
-cat("Total num of NON-ZERO features: ", nrow(featureWeights) , "/" , ncol(matrix))
+cat("Total num of NON-ZERO features: ", nrow(featureWeights) , "/" , ncol(train_validate_matrix))
 print(subset(featureWeights, features %in% addedFeatures))

@@ -14,35 +14,24 @@ namespace TriviaGeneration
     class Program
     {
         //static System.IO.StreamWriter positiveDataFile;
-        static void Main(string[] args)
+        static void Main22(string[] args)
         {
             //string allfileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\Country\countryTrivia.txt";
             //positiveDataFile = new System.IO.StreamWriter(allfileName, true);
             
             List<string> urls = new List<string>();
-            urls.Add(@"http://en.wikipedia.org/wiki/Pineapple_Express_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Elf_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Let_Me_In_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Riddick_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Aliens_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/The_Commitments_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Talk_to_Her");
-            urls.Add(@"http://en.wikipedia.org/wiki/Primary_Colors_%28film%29");
+            urls.Add(@"http://en.wikipedia.org/wiki/Jennifer_Aniston");
+            urls.Add(@"http://en.wikipedia.org/wiki/Jessica_Alba");
+            urls.Add(@"http://en.wikipedia.org/wiki/Emma_Stone");
+            urls.Add(@"http://en.wikipedia.org/wiki/Cameron_Diaz");
+            urls.Add(@"http://en.wikipedia.org/wiki/Scarlett_Johansson");
+            urls.Add(@"http://en.wikipedia.org/wiki/Taylor_Swift");
+            urls.Add(@"http://en.wikipedia.org/wiki/Julia_Roberts");
+            urls.Add(@"http://en.wikipedia.org/wiki/Emma_Watson");
+            urls.Add(@"http://en.wikipedia.org/wiki/Angelina_Jolie");
+            urls.Add(@"http://en.wikipedia.org/wiki/Owen_Wilson");
+            
 
-            /*
-            urls.Add(@"http://en.wikipedia.org/wiki/India");
-            /*
-            urls.Add(@"http://en.wikipedia.org/wiki/Lone_Survivor_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Man_of_Steel_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/Final_Destination_%28film%29");
-            urls.Add(@"http://en.wikipedia.org/wiki/The_Incredibles");
-            urls.Add(@"http://en.wikipedia.org/wiki/Transformers:_Dark_of_the_Moon");
-            urls.Add(@"http://en.wikipedia.org/wiki/The_Deer_Hunter");
-            urls.Add(@"http://en.wikipedia.org/wiki/Who_Framed_Roger_Rabbit");
-            urls.Add(@"http://en.wikipedia.org/wiki/Batman_Begins");
-            urls.Add(@"http://en.wikipedia.org/wiki/Rio_2");
-            urls.Add(@"http://en.wikipedia.org/wiki/Her_%28film%29");
-            */
             generateTextFile(urls);
             
             /*
@@ -66,7 +55,7 @@ namespace TriviaGeneration
         {
             foreach (string url in urls)
             {
-                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\movieTest\indivFiles\" + url.Remove(0, 29).Replace(":", "") + ".txt";
+                string fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\wikiText\HollywoodActors\input\" + url.Remove(0, 29).Replace(":", "") + ".txt";
                 
                 if (File.Exists(fileName))
                 {

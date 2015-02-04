@@ -23,7 +23,10 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\UHRS\\Country\\predict\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\judgedWiki\\";
+    static String In_movieID_Trivia = folderPath + "movieID_Trivia.txt";
+    
+    // not to change
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
     static String Out_rootWords = folderPath + "PRO_rootWord.txt";
     static String In_subjWords = folderPath + "INT_D_subjectWords.txt";
@@ -32,7 +35,6 @@ public class EntityLinker {
     static String Out_underRootWors = folderPath + "PRO_underRootWords.txt";
     
     static String In_entityDictionary = folderPath + "entityLinks.txt";
-    static String In_movieID_Trivia = folderPath + "Country_Trivia.txt";
     static String Out_allEntitiesPresent = folderPath + "PRO_allLinkedEntities.txt";
     static String Out_ExpandedEntities = folderPath + "PRO_ExpandedEntites.txt";
     
@@ -43,7 +45,7 @@ public class EntityLinker {
     
     static List<String> STOPWORDS = new ArrayList<String>();
     
-    static Boolean CONST_DO_LINKING = false;
+    static Boolean CONST_DO_LINKING = true;
     
     public static void main(String[] args) throws IOException
     {

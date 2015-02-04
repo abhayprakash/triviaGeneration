@@ -31,8 +31,8 @@ import org.json.simple.parser.ParseException;
  * @author Abhay Prakash
  */
 public class popularityMeasure {
-    static String In_entities = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\ForScoringPopularity.txt";
-    static String Out_resultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\freebasePopularity.txt";
+    static String In_entities = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\celebList.txt";
+    static String Out_resultFile = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\celebPopularity.txt";
             
     static String key = "AIzaSyAVVKmcTUk2lZc7sFJetpkWuTCxYAauHc0";           
     
@@ -40,13 +40,13 @@ public class popularityMeasure {
     
     public static void main22(String[] args) throws IOException, ParseException
     {
-        String json = searchTest( "Emma", "");//&scoring=entity");
+        String json = searchTest( "15 August", "");//&scoring=entity");
         System.out.println(json);
         System.out.println(ParseJSON_getScore(json));
     }
     
     public static void main(String[] args) throws IOException{
-        ReadKnownPopularityScores();
+        //ReadKnownPopularityScores();
         FileWriter fw = new FileWriter(Out_resultFile);
         BufferedWriter bw = new BufferedWriter(fw);
         
@@ -57,7 +57,8 @@ public class popularityMeasure {
         {
             String[] row = line.split("\t");
             double score = 0;
-            String entityName = row[1].toLowerCase().trim();
+            String entityName = row[0].toLowerCase().trim();
+            System.out.println("Searching for : " + entityName);
             if(knownScore_table.containsKey(entityName))
             {
                 //System.out.println("Already known for: " + entityName);
@@ -71,8 +72,10 @@ public class popularityMeasure {
                 }catch(Exception e){
                     score = 0;
                 }
+                System.out.println("Putting : " + entityName);
+                knownScore_table.put(entityName, score);
             }
-            bw.write(row[0] + "\t" + row[1] + "\t" + score + "\n");
+            bw.write(row[0] + "\t" + score + "\n");
             System.out.println(row[0]);
         }
         bw.close();

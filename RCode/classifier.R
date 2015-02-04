@@ -19,7 +19,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model <- NULL
   
   for (i in sort(unique(rand))) {
-    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], method = method, cross = cross, cost = cost, kernel = kernel)
+    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], gamma= 0.001, method = method, cross = cross, cost = cost, kernel = kernel)
     pred <- predict(model, alldata[rand == i, ])
     
     # for comparision: original and predicted
@@ -62,7 +62,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model
 }
 
-data <- read.csv("trainData_5K_richFeatures.txt", sep='\t', header=T)
+data <- read.csv("train_data.txt", sep='\t', header=T)
 data <- data[sample(nrow(data)),]
 #load("compareData.RData")
 
@@ -118,11 +118,11 @@ matrix[index,"FOG"] <- as.factor(3)
 
 ############ training and testing
 container <- create_container(matrix, t(training_codes), trainSize=1:trainEnd, testSize=testStart:totalRows, virgin=FALSE)
-model <- cross_validate_SVM_PRFA(container, 5, "SVM", kernel = "linear")
+model <- cross_validate_SVM_PRFA(container, 5, cost = 100, "SVM", kernel = "linear")
 
   # svm tuning
   obj <- tune ("svm", train.x = container@training_matrix, train.y = container@training_codes, validation.x = container@classification_matrix,
-               validation.y = container@testing_codes, cost = 10^(0:3))
+               validation.y = container@testing_codes, cost = 10^(1:3), gamma = 0.001)
 
   # only on 1 of the folds
   model <- train_model(container, algorithm=c("SVM"), method = "C-classification", cross = 5, cost = 100, kernel = "linear")

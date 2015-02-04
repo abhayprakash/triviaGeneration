@@ -26,11 +26,11 @@ public class contradictory_words {
         String list = "but,rather,contrast,although,still,instead,unlike,whereas,yet,conversel,despite,otherwise,contrary,however,spite,besides,even,regardless,nonetheless";
         List<String> CONTRA_WORDS = Arrays.asList(list.split(","));
         
-        String resultComp = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\FRESH_ALL_EXPT_20_MOVIES_5J_JUDGES\\classification_1_0_rich_IMDb\\res_contra.txt";
+        String resultComp = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\judgedWiki\\res_contra.txt";
         FileWriter fw = new FileWriter(resultComp);
         BufferedWriter bw = new BufferedWriter(fw);
         
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\FRESH_ALL_EXPT_20_MOVIES_5J_JUDGES\\classification_1_0_rich_IMDb\\test_trivia.txt";
+        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\judgedWiki\\trivia.txt";
         FileReader inputFile = new FileReader(inputFilePath);
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String input;

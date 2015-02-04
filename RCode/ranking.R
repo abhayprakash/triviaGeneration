@@ -114,7 +114,7 @@ for(i in 1:num_times)
   system('java svmLight_FormatWriter validate_features.txt validate_features_svmLight.txt');
 
   # create model from train part
-  system('./svm_rank_learn.exe -c 3 train_features_svmLight.txt model_rank_1_4_IMDb')
+  system('./svm_rank_learn.exe -c 100 -t 2 -g 0.001 train_features_svmLight.txt model_rank_1_4_IMDb')
   
   # predict on validate part
   system('./svm_rank_classify.exe validate_features_svmLight.txt model_rank_1_4_IMDb validation_predicted_rank_1_4.txt')
@@ -159,12 +159,11 @@ system('java svmLight_FormatWriter all_train_features.txt all_train_features_svm
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
+system('./svm_rank_learn.exe -c 100 -t 2 -g 0.001 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
 
 # predict on test set
 #system('./svm_rank_classify.exe test_features_svmLight.txt model_rank_1_4_IMDb test_predicted_rank_1_4.txt')
 system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
-
 
 # generate result file for test set
 test_file <- read.csv(TEST_DATA_FILE_NAME, sep = '\t', header = TRUE)

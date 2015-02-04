@@ -19,7 +19,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model <- NULL
   
   for (i in sort(unique(rand))) {
-    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], method = method, cross = cross, cost = cost, kernel = kernel, probability = TRUE)
+    model <- svm(x = alldata[rand != i, ], y = allcodes[rand != i], gamma=0.001, method = method, cross = cross, cost = cost, kernel = kernel, probability = TRUE)
     pred <- predict(model, alldata[rand == i, ])
     
     # for comparision: original and predicted
@@ -75,7 +75,7 @@ train_validate_data$LIKENESS_RATIO <- NULL
 train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
-test_data <- read.csv("test_set_clean.txt", header = T, sep = '\t')
+test_data <- read.csv("test_set.txt", header = T, sep = '\t')
 test_data$MOVIE <- NULL
 test_data$count_boring <- NULL
 test_data$count_interesting <- NULL
@@ -143,7 +143,7 @@ validateStart <- trainEnd + 1
 train_validate_container <- create_container(train_validate_matrix, t(train_validate_codes), trainSize=1:trainEnd, testSize=validateStart:train_validate_rows, virgin=FALSE)
 
 # training
-model <- cross_validate_SVM_PRFA(train_validate_container, 5, "SVM", kernel = "linear")#train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 90, kernel = "linear")
+model <- cross_validate_SVM_PRFA(train_validate_container, 5, "SVM", kernel = "radial")#train_model(train_validate_container, algorithm=c("SVM"), method = "C-classification", cross = 0, cost = 90, kernel = "linear")
 
 # preparing container for test data
 test_rows <- nrow(test_matrix)
@@ -153,7 +153,7 @@ test_container <- create_container(test_matrix, t(test_codes), trainSize=NULL, t
 test_results <- classify_model(test_container, model)
 
 # result all
-test_data <- read.csv("test_set_clean.txt", header = T, sep='\t')
+test_data <- read.csv("test_set.txt", header = T, sep='\t')
 results <- cbind(data.frame(test_data),data.frame(test_results))
 
 # generating predict file for unseen test

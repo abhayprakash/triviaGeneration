@@ -17,9 +17,9 @@ import java.io.IOException;
  * @author Abhay Prakash
  */
 public class readabilityIndex {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\";
-    static String inputFilePath = "all_trivia.txt";
-    static String resultFilePath = "all_fogIndex.txt";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\FRESH_ALL_EXPT_20_MOVIES_5J_JUDGES\\classification_1_0_rich_judged_4k\\";
+    static String inputFilePath = "trivia.txt";
+    static String resultFilePath = "fogIndex.txt";
     public static void main(String[] args) throws IOException
     {
         FileWriter fw = new FileWriter(folderPath + resultFilePath);
@@ -29,7 +29,7 @@ public class readabilityIndex {
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String input;
         int lineNum = 0;
-        //input = bufferReader.readLine();
+        
         while((input = bufferReader.readLine()) != null)
         {
             //NOTE: WHEN I WILL TAKE MULTIPLE LINES' TRIVIA, then I will have to do it for each sentence

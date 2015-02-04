@@ -11,21 +11,22 @@ namespace TriviaGeneration
     class EntityLinking_scraping
     {
         static StreamWriter writer;
-        static void Main22(string[] args)
+        static void Main(string[] args)
         {
+            /*
             String presentFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\presentLinks.txt";
             StreamReader pr = new StreamReader(presentFile);
             String pLink;
-
+            */
             HashSet<String> present = new HashSet<string>();
-
+            /*
             while ((pLink = pr.ReadLine()) != null)
             {
                 present.Add(pLink.Trim());
             }
-
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\movie_URL.txt";
-            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\entityLinks1.txt";
+            */
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\RANK\judgedWiki\movieURLs.txt";
+            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\RANK\judgedWiki\entityLinks.txt";
             StreamReader r = new StreamReader(fileName);
             writer = new StreamWriter(writeFile);
             string URL; int nn = 1;

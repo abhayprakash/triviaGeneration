@@ -200,3 +200,17 @@ cat("p@10 : ", precision_in_10)
 
 # writing result file
 #write.table(top10Result, "top10_1_0_rich_classification.txt", sep='\t',row.names=F)
+
+# ranking of features ----------------
+w = t(model$coefs) %*% model$SV
+features <- colnames(train_validate_matrix)[w@ja]
+weights <- w@ra
+featureWeights <- data.frame(cbind(features, weights))
+featureWeights$weights <- abs(as.numeric(as.character(featureWeights$weights)))
+featureWeights <- featureWeights[with(featureWeights, order(-weights)),]
+row.names(featureWeights) <- 1:nrow(featureWeights)
+zeroFeatures <- colnames(train_validate_matrix)[-w@ja]
+
+# get rank of features
+cat("Total num of NON-ZERO features: ", nrow(featureWeights) , "/" , ncol(matrix))
+print(subset(featureWeights, features %in% addedFeatures))

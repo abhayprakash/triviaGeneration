@@ -144,8 +144,8 @@ for(i in 1:num_times)
   total_P_in_10 = total_P_in_10 + precision_in_10;
 }
 print(indiv_p);
-cross_vaildate <- total_P_in_10/num_times;
-cat("CV Avg. P@10: ", cross_validate);
+cv_value <- total_P_in_10/num_times;
+cat("CV Avg. P@10: ", cv_value);
 
 # Final prediction on unseen test -------------------------
 #writing features in table format
@@ -188,7 +188,7 @@ for(i in 1:length(movie_result))
   total_correct_in_10 <- total_correct_in_10 + correct_in_10
 }
 precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
-cat("CV Avg. P@10: ", cross_validate);
+cat("CV Avg. P@10: ", cv_value);
 cat("TEST p@10 : ", precision_in_10);
 
 # writing result file

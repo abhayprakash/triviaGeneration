@@ -2,7 +2,7 @@ library(tm)
 library(RTextTools)
 
 TRAIN_DATA_FILE_NAME <- "trainData_variation_rank_1_4.txt";
-TEST_DATA_FILE_NAME <- "test_set_clean.txt";
+TEST_DATA_FILE_NAME <- "test_set.txt";
 
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
@@ -114,7 +114,7 @@ for(i in 1:num_times)
   system('java svmLight_FormatWriter validate_features.txt validate_features_svmLight.txt');
 
   # create model from train part
-  system('./svm_rank_learn.exe -c 100 -t 2 -g 0.001 train_features_svmLight.txt model_rank_1_4_IMDb')
+  system('./svm_rank_learn.exe -c 3 train_features_svmLight.txt model_rank_1_4_IMDb')
   
   # predict on validate part
   system('./svm_rank_classify.exe validate_features_svmLight.txt model_rank_1_4_IMDb validation_predicted_rank_1_4.txt')
@@ -144,7 +144,8 @@ for(i in 1:num_times)
   total_P_in_10 = total_P_in_10 + precision_in_10;
 }
 print(indiv_p);
-cat("Avg. P@10 on 53 movies: ", total_P_in_10/num_times)
+cross_vaildate <- total_P_in_10/num_times;
+cat("CV Avg. P@10: ", cross_validate);
 
 # Final prediction on unseen test -------------------------
 #writing features in table format
@@ -159,7 +160,7 @@ system('java svmLight_FormatWriter all_train_features.txt all_train_features_svm
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-system('./svm_rank_learn.exe -c 100 -t 2 -g 0.001 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
+system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
 
 # predict on test set
 #system('./svm_rank_classify.exe test_features_svmLight.txt model_rank_1_4_IMDb test_predicted_rank_1_4.txt')
@@ -187,7 +188,8 @@ for(i in 1:length(movie_result))
   total_correct_in_10 <- total_correct_in_10 + correct_in_10
 }
 precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
-cat("p@10 : ", precision_in_10)
+cat("CV Avg. P@10: ", cross_validate);
+cat("TEST p@10 : ", precision_in_10);
 
 # writing result file
 write.table(top10Result, "temp_result_top10_rank_svm_test_set_clean.txt", sep='\t',row.names=F)

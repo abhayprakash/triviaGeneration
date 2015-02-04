@@ -2,6 +2,9 @@ library(tm)
 library(RTextTools)
 library(e1071)
 
+TRAIN_DATA_FILE_NAME <- "train_data.txt";
+TEST_DATA_FILE_NAME <- "test_set_clean.txt";
+
 cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification", cross = 0, cost = 100, kernel = "radial")
 {
   extract_label_from_prob_names <- function(x) return(rownames(as.matrix(which.max(x))))
@@ -62,7 +65,7 @@ cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification
   model
 }
 
-train_validate_data <- read.csv("train_data.txt", sep='\t', header=T)
+train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
 train_validate_data <- train_validate_data[sample(nrow(train_validate_data)),]
 
 # for multiclass
@@ -75,7 +78,7 @@ train_validate_data$LIKENESS_RATIO <- NULL
 train_validate_rows <- nrow(train_validate_data)
 
 # HACK PART: add the unseen test part also
-test_data <- read.csv("test_set.txt", header = T, sep = '\t')
+test_data <- read.csv(TEST_DATA_FILE_NAME, header = T, sep = '\t')
 test_data$MOVIE <- NULL
 test_data$count_boring <- NULL
 test_data$count_interesting <- NULL

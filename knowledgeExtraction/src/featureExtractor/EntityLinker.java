@@ -23,7 +23,7 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\judgedWiki\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\temp\\";
     static String In_movieID_Trivia = folderPath + "movieID_Trivia.txt";
     
     // not to change
@@ -78,12 +78,13 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
+            line = line.trim();
             String[] row = line.split("\t");
             row[0] = row[0].trim();
             //System.out.println(lineNum + " : " + row.length + " : " + row[0] + row[1] + row[2]);
             dict.putIfAbsent(row[0], new HashMap<>());
-            dict.get(row[0]).putIfAbsent(row[1], new ArrayList<>());
-            dict.get(row[0]).get(row[1]).add(row[2]);
+            dict.get(row[0]).putIfAbsent(row[1].trim(), new ArrayList<>());
+            dict.get(row[0]).get(row[1].trim()).add(row[2].trim());
             lineNum++;
         }
         System.out.println("Read " + lineNum + " lines");
@@ -99,21 +100,22 @@ public class EntityLinker {
         
         String line;
         int lineNum = 0;
-        line = bufferReader.readLine();
+        //line = bufferReader.readLine();
         while((line = bufferReader.readLine()) != null)
         {
+            line = line.trim();
             //System.out.println(line);
             String[] row = line.split("\t");
             row[0] = row[0].trim();
             movieIDs.add(row[0]);
             if(row.length > 3)
                 System.out.println("TAKE NOTE OF TRIVIA NUMBER: " + lineNum + " :: " + row.length);
-            try{
+            //try{
                 ProcessSingleLine_AllEnitiesPresent(row[0],row[1]);
-            }catch(Exception e){
+            /*}catch(Exception e){
                 System.out.println(line + " : : " + e.toString());
                 System.in.read();
-            }
+            }*/
             lineNum++;
         }
         System.out.println("found all linkable entities, number of lines: " + lineNum);
@@ -128,18 +130,18 @@ public class EntityLinker {
         //System.out.println("Trivia: " + Trivia);
         //System.out.println("movie: " + movieID);
         
-        for(String entity_X: dict.get(movieID).keySet())
+        for(String entity_X: dict.get(movieID.trim()).keySet())
         {//continue if found i.e. break inner for loops
             //System.out.println("entity type: " + entity_X);
-            for(String candidate : dict.get(movieID).get(entity_X))
+            for(String candidate : dict.get(movieID.trim()).get(entity_X))
             {
-                candidate = candidate.toLowerCase();
+                candidate = candidate.toLowerCase().trim();
                 //System.out.println("candidate: " + candidate);
                 Boolean toBreak = false;
                 for(String triviaWord : words) // Yes, I know that same word can be linked to different entity_type, denoting their presence - any ways we need to give benfit of doubt and the more awesome thing is if a person is director as well as producer, somehow this signal too will get captured some how
                 {
                     //System.out.println("Trivia Word: " + triviaWord);
-                    if(Arrays.asList(candidate.split(" ")).contains(triviaWord) && !STOPWORDS.contains(triviaWord))
+                    if(Arrays.asList(candidate.split(" ")).contains(triviaWord.trim()) && !STOPWORDS.contains(triviaWord.trim()))
                     {
                         //if(entity_X.equals("entity_Character"))
                         //    System.out.println("Matched: " + triviaWord + " :: " + entity_X + " :: " + candidate);
@@ -167,15 +169,16 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
+            line = line.trim();
             String movieID;
             if(CONST_DO_LINKING)
-                movieID = movieIDs.get(lineNum);
+                movieID = movieIDs.get(lineNum).trim();
             else
                 movieID = "0";
             
             lineNum++;
            // try{
-                Process_Sentence(movieID, line, bw_root, "root_");
+                Process_Sentence(movieID.trim(), line, bw_root, "root_");
             //}catch(Exception e)
             //{
                 //System.out.println("here " + movieID);
@@ -196,10 +199,10 @@ public class EntityLinker {
         for(int i = 1; i < row.length; i++)
         {
             String[] ner_Word = row[i].split(":");
-            ner_Word[1] = ner_Word[1].toLowerCase();
-            if(ner_Word[0].equals("O"))
+            ner_Word[1] = ner_Word[1].toLowerCase().trim();
+            if(ner_Word[0].trim().equals("O"))
             {
-                String print = prefix + ner_Word[1];
+                String print = prefix + ner_Word[1].trim();
                 if(!alreadyOccured.containsKey(print))
                 {
                     bw.write(print + " ");
@@ -209,14 +212,14 @@ public class EntityLinker {
             else
             {
                 Boolean linked = false;
-                for(String entity_X : dict.get(movieID).keySet())
+                for(String entity_X : dict.get(movieID.trim()).keySet())
                 {
-                    for(String candidate : dict.get(movieID).get(entity_X))
+                    for(String candidate : dict.get(movieID.trim()).get(entity_X))
                     {
-                        candidate = candidate.toLowerCase();
-                        if(Arrays.asList(candidate.split(" ")).contains(ner_Word[1]) && !STOPWORDS.contains(ner_Word[1]))
+                        candidate = candidate.toLowerCase().trim();
+                        if(Arrays.asList(candidate.split(" ")).contains(ner_Word[1].trim()) && !STOPWORDS.contains(ner_Word[1].trim()))
                         {
-                            String print = prefix + entity_X; 
+                            String print = prefix + entity_X.trim(); 
                             if(!alreadyOccured.containsKey(print))
                             {
                                 bw.write(print + " ");
@@ -232,7 +235,7 @@ public class EntityLinker {
                 
                 if(linked.equals(false))
                 {
-                    String print = prefix + "unlinked_" + ner_Word[0];
+                    String print = prefix + "unlinked_" + ner_Word[0].trim();
                     if(!alreadyOccured.containsKey(print))
                     {
                         bw.write(print + " ");
@@ -256,9 +259,10 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
+            line = line.trim();
             String movieID;
             if(CONST_DO_LINKING)
-                movieID = movieIDs.get(lineNum);
+                movieID = movieIDs.get(lineNum).trim();
             else
                 movieID = "0";
             
@@ -282,9 +286,10 @@ public class EntityLinker {
         int lineNum = 0;
         while((line = bufferReader.readLine()) != null)
         {
+            line = line.trim();
             String movieID;
             if(CONST_DO_LINKING)
-                movieID = movieIDs.get(lineNum);
+                movieID = movieIDs.get(lineNum).trim();
             else
                 movieID = "0";
             

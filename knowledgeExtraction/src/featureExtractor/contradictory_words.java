@@ -21,16 +21,19 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class contradictory_words {
+    
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\temp\\";
+    static String resultComp = folderPath + "INT_contradictory.txt";
+    static String inputFilePath = folderPath + "trivia.txt";
+    
     public static void main(String[] args) throws IOException
     {
         String list = "but,rather,contrast,although,still,instead,unlike,whereas,yet,conversel,despite,otherwise,contrary,however,spite,besides,even,regardless,nonetheless";
         List<String> CONTRA_WORDS = Arrays.asList(list.split(","));
         
-        String resultComp = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\judgedWiki\\res_contra.txt";
         FileWriter fw = new FileWriter(resultComp);
         BufferedWriter bw = new BufferedWriter(fw);
         
-        String inputFilePath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\judgedWiki\\trivia.txt";
         FileReader inputFile = new FileReader(inputFilePath);
         BufferedReader bufferReader = new BufferedReader(inputFile);
         String input;

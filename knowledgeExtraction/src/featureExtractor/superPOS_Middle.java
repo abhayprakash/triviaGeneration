@@ -39,7 +39,7 @@ public class superPOS_Middle {
     
     static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\temp\\";
     static String resultComp = folderPath + "INT_middleSuperPOS.txt";
-    static String inputFilePath = folderPath + "trivia.txt";
+    static String inputFilePath = folderPath + "temp.txt";
     
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
         FileWriter fw = new FileWriter(resultComp);
@@ -75,7 +75,7 @@ public class superPOS_Middle {
             for (CoreMap sentence : sentences) {
                 int position = 0;
                 for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-                    if(position != 0)
+                    if(position == 0)
                     {
                         position = 1;
                         continue;

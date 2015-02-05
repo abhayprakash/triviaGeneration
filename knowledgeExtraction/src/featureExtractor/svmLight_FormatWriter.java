@@ -27,9 +27,10 @@ import java.util.TreeSet;
  * @author Abhay Prakash
  */
 public class svmLight_FormatWriter {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\RANK\\svm_rank_4ranks\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\rankTemp\\";
     static String infilePath = folderPath + "train_features.txt";
-    static String outfilePath = folderPath + "train_Features_svmLight.txt";
+    static String outfilePath = folderPath + "train_features_svmLight.txt";
+    static String featureMapFilePath = folderPath + "featureMap.txt";
     
     public static void main(String[] args) throws FileNotFoundException, IOException
     {
@@ -43,6 +44,8 @@ public class svmLight_FormatWriter {
         BufferedReader bufferReader = new BufferedReader(inputFile);
         FileWriter fw = new FileWriter(outfilePath);
         BufferedWriter bw = new BufferedWriter(fw);
+        FileWriter fw2 = new FileWriter(featureMapFilePath);
+        BufferedWriter bw2 = new BufferedWriter(fw2);
         
         String input;
         int lineNum = 0;
@@ -50,6 +53,24 @@ public class svmLight_FormatWriter {
         String[] featureNames = input.split("\t");
         int id = 0, movie_position = 0, rank_position = 0;
         
+        for(String f: featureNames)
+        {
+            id++;
+            if(f.equals("MOVIE"))
+            {
+                continue;
+                //movie_position = id;
+            }
+            else if(f.equals("train_validate_codes"))
+            {
+                continue;
+                //rank_position = id;
+            }
+            bw2.write(Integer.toString(id) + "\t" + f + "\n");
+        }
+        bw2.close();
+        
+        id = 0; movie_position = 0; rank_position = 0;
         for(String f: featureNames)
         {
             id++;

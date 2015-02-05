@@ -34,7 +34,7 @@ combined_trivia <- combined_data["TRIVIA"]
 combined_codes <- combined_data["GRADE"]
 
 # Unigram words: combined for train, validate and test
-combined_matrix <- create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, tolower=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
+combined_matrix <- create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, toLower = TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
 rm(combined_trivia)
 
 # parse tree features: combined for train, validate and test

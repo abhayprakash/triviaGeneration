@@ -38,6 +38,7 @@ public class svmLight_FormatWriter {
         {
             infilePath = args[0];
             outfilePath = args[1];
+            featureMapFilePath = args[2];
         }
         
         FileReader inputFile = new FileReader(infilePath);

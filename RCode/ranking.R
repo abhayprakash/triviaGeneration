@@ -1,10 +1,10 @@
 library(tm)
 library(RTextTools)
 
-TRAIN_DATA_FILE_NAME <- "train_data_more_movies.txt";
+TRAIN_DATA_FILE_NAME <- "train_data_5Buckets.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
-do_cross_validate <- TRUE
+do_cross_validate <- FALSE
 
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
@@ -72,7 +72,7 @@ combined_matrix[index,"FOG"] <- as.factor(2)
 index <- (combined_matrix[,"FOG"] >= 15)
 combined_matrix[index,"FOG"] <- as.factor(3)
 
-rm(addedFeatures, col, index)
+rm(col, index)
 
 # tracking breakpoint
 test_start <- train_validate_rows+1
@@ -92,6 +92,7 @@ rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, te
 
 # Cross validating within known result set -----------------
 num_times = 5;
+num_validate = length(unique(train_validate_data$Movie.Roll.Num))/num_times
 indiv_p <- NULL;
 total_P_in_10 = 0;
 if(do_cross_validate)
@@ -100,7 +101,7 @@ for(i in 1:num_times)
   # forming validate set (50 movies -> all trivia)
   allMovies <- unique(train_validate_data$Movie.Roll.Num)
   numMovies <- length(allMovies)
-  validateMovies_roll_num <- sample(1:numMovies, 111, replace = FALSE)
+  validateMovies_roll_num <- sample(1:numMovies, num_validate, replace = FALSE)
   trainMovies_roll_num <- setdiff(allMovies, validateMovies_roll_num)
   validate_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
   train_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
@@ -114,8 +115,8 @@ for(i in 1:num_times)
   write.table(validateMAT, "rankTemp/validate_features.txt", sep = '\t', quote = F, row.names=F)
 
   # call svmlight_format writer
-  system('java svmLight_FormatWriter rankTemp/train_features.txt rankTemp/train_features_svmLight.txt');
-  system('java svmLight_FormatWriter rankTemp/validate_features.txt rankTemp/validate_features_svmLight.txt');
+  system('java svmLight_FormatWriter rankTemp/train_features.txt rankTemp/train_features_svmLight.txt rankTemp/f2.txt');
+  system('java svmLight_FormatWriter rankTemp/validate_features.txt rankTemp/validate_features_svmLight.txt rankTemp/f3.txt');
 
   # create model from train part
   system('./svm_rank_learn.exe -c 3 rankTemp/train_features_svmLight.txt rankTemp/model_rank_1_4_IMDb')
@@ -157,8 +158,8 @@ write.table(comMAT, "rankTemp/all_train_features.txt", sep = '\t', quote = F, ro
 write.table(test_matrix, "rankTemp/test_features.txt", sep = '\t', quote = F, row.names=F)
 
 # converting to svm light format
-system('java svmLight_FormatWriter rankTemp/test_features.txt rankTemp/test_features_svmLight.txt');
-system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_train_features_svmLight.txt');
+system('java svmLight_FormatWriter rankTemp/test_features.txt rankTemp/test_features_svmLight.txt rankTemp/f1.txt');
+system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_train_features_svmLight.txt rankTemp/featureMap.txt');
 
 # removing unused
 rm(comMAT, test_matrix, trainMAT, validateMAT)
@@ -198,3 +199,12 @@ cat("TEST p@10 : ", precision_in_10);
 
 # writing result file
 write.table(top10Result, "result_top10.txt", sep='\t',row.names=F)
+
+# get feature weights in rank svm
+system('java Get_featureWeights rankTemp/featureMap.txt rankTemp/model_all_train_rank_1_4_IMDb rankTemp/featureWeights.txt');
+featureWeights <- read.csv("rankTemp/featureWeights.txt", sep = '\t', header = FALSE)
+featureWeights$weights <- abs(as.numeric(as.character(featureWeights$V2)))
+featureWeights <- featureWeights[with(featureWeights, order(-weights)),]
+row.names(featureWeights) <- 1:nrow(featureWeights)
+cat("Total Featuires = ", nrow(featureWeights))
+print(subset(featureWeights, V1 %in% addedFeatures))

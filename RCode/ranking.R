@@ -4,7 +4,7 @@ library(RTextTools)
 TRAIN_DATA_FILE_NAME <- "train_data_more_movies.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
-do_cross_validate <- FALSE
+do_cross_validate <- TRUE
 
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
@@ -14,6 +14,7 @@ train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
 train_validate_data$INTERESTED <- NULL
 train_validate_data$VOTED <- NULL
 train_validate_data$LIKENESS_RATIO <- NULL
+train_validate_data$BASE_superPOS <- NULL
 
 # in case of name difference, name change of the movie column
 names(train_validate_data)[names(train_validate_data) == 'MOVIE_NAME_IMDB'] <- 'MOVIE'
@@ -33,7 +34,7 @@ combined_trivia <- combined_data["TRIVIA"]
 combined_codes <- combined_data["GRADE"]
 
 # Unigram words: combined for train, validate and test
-combined_matrix <- create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
+combined_matrix <- create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, tolower=TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
 rm(combined_trivia)
 
 # parse tree features: combined for train, validate and test

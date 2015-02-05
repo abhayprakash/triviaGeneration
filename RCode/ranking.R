@@ -163,12 +163,11 @@ system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-#system('./svm_rank_learn.exe -c 3 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
-system('java -jar RankLib.jar -train rankTemp/all_train_features_svmLight.txt -ranker 0 -metric2t P@10 -tvs 0.8 -save rankTemp/RankLib_model_all_train_1_4_IMDb -test rankTemp/test_features_svmLight.txt')
+system('./svm_rank_learn.exe -c 3 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
+#system('java -jar RankLib.jar -train rankTemp/all_train_features_svmLight.txt -ranker 0 -metric2t P@10 -tvs 0.8 -save rankTemp/RankLib_model_all_train_1_4_IMDb -test rankTemp/test_features_svmLight.txt')
 
 # predict on test set
 #system('./svm_rank_classify.exe rankTemp/test_features_svmLight.txt rankTemp/model_rank_1_4_IMDb rankTemp/test_predicted_rank_1_4.txt')
-#system('./svm_rank_classify.exe rankTemp/test_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb rankTemp/test_predicted_rank_1_4.txt')
 system('./svm_rank_classify.exe rankTemp/test_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb rankTemp/test_predicted_rank_1_4.txt')
 
 # generate result file for test set

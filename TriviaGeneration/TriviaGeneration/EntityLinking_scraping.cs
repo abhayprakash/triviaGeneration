@@ -13,42 +13,43 @@ namespace TriviaGeneration
         static StreamWriter writer;
         static void Main(string[] args)
         {
-            /*
-            String presentFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\UHRS\presentLinks.txt";
+            String presentFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\MORE_DATA\temp\presentLinks.txt";
             StreamReader pr = new StreamReader(presentFile);
             String pLink;
-            */
             HashSet<String> present = new HashSet<string>();
-            /*
+            
             while ((pLink = pr.ReadLine()) != null)
             {
                 present.Add(pLink.Trim());
             }
-            */
-            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\RANK\judgedWiki\movieURLs.txt";
-            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\RANK\judgedWiki\entityLinks.txt";
+
+            Console.WriteLine("Present : " + present.Count);
+
+            String fileName = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\MORE_DATA\temp\movieURLs.txt";
+            String writeFile = @"C:\Users\Abhay Prakash\Workspace\trivia\Data\IMDb\anotherSelected5k\MORE_DATA\temp\entityLinks_new.txt";
             StreamReader r = new StreamReader(fileName);
             writer = new StreamWriter(writeFile);
             string URL; int nn = 1;
             while ((URL = r.ReadLine()) != null)
             {
+                URL = URL.Trim();
                 Console.Write(nn++);
-                /*try
-                {*/
-                if (!present.Contains(URL))
+                try
                 {
-                    ProcessMovie(URL);
-                    Console.WriteLine(" Done: " + URL);
+                    if (!present.Contains(URL))
+                    {
+                        ProcessMovie(URL);
+                        Console.WriteLine(" Done: " + URL);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Already Present");
+                    }
                 }
-                else
-                {
-                    Console.WriteLine("present");
-                }
-                /*}
                 catch (Exception e)
                 {
                     Console.WriteLine(" IGNORING: " + URL);
-                }*/
+                }
             }
             writer.Flush();
             writer.Close();
@@ -58,6 +59,7 @@ namespace TriviaGeneration
         static void ProcessMovie(String URL)
         {
             URL = URL + "fullcredits";
+            Console.WriteLine("Trying URL: " + URL);
             HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
             HtmlAgilityPack.HtmlDocument doc = web.Load(URL);
             String movieID = URL.Replace("fullcredits", "");
@@ -69,7 +71,7 @@ namespace TriviaGeneration
 
                 count++;
                 String candidate = row.InnerText.Replace("&nbsp;", "").Trim();
-                Console.WriteLine("CAND: " + candidate);
+                //Console.WriteLine("CAND: " + candidate);
                 if (candidate.Contains("Cast") && !candidate.Contains("By") && !candidate.Contains("by") && !candidate.Contains("ing"))
                 {
                     String entityType = "entity_Cast";

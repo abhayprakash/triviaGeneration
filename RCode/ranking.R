@@ -4,6 +4,8 @@ library(RTextTools)
 TRAIN_DATA_FILE_NAME <- "trainData_variation_rank_1_4.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
+do_cross_validate <- FALSE
+
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
 
@@ -91,6 +93,7 @@ rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, te
 num_times = 5;
 indiv_p <- NULL;
 total_P_in_10 = 0;
+if(do_cross_validate)
 for(i in 1:num_times)
 {
   # forming validate set (50 movies -> all trivia)
@@ -160,10 +163,12 @@ system('java svmLight_FormatWriter all_train_features.txt all_train_features_svm
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
+#system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
+system('java -jar RankLib.jar -train all_train_features_svmLight.txt -ranker 0 -metric2t P@10 -tvs 0.8 -save RankLib_model_all_train_1_4_IMDb -test test_features_svmLight.txt')
 
 # predict on test set
 #system('./svm_rank_classify.exe test_features_svmLight.txt model_rank_1_4_IMDb test_predicted_rank_1_4.txt')
+#system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
 system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
 
 # generate result file for test set

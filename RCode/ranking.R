@@ -1,7 +1,7 @@
 library(tm)
 library(RTextTools)
 
-TRAIN_DATA_FILE_NAME <- "trainData_variation_rank_1_4.txt";
+TRAIN_DATA_FILE_NAME <- "train_data_more_movies.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
 do_cross_validate <- FALSE
@@ -109,21 +109,21 @@ for(i in 1:num_times)
   validateMAT <- data.frame(comMAT[validate_index,])
 
   # writing feature matrix for train set and validate set 
-  write.table(trainMAT, "train_features.txt", sep = '\t', quote = F, row.names=F)
-  write.table(validateMAT, "validate_features.txt", sep = '\t', quote = F, row.names=F)
+  write.table(trainMAT, "rankTemp/train_features.txt", sep = '\t', quote = F, row.names=F)
+  write.table(validateMAT, "rankTemp/validate_features.txt", sep = '\t', quote = F, row.names=F)
 
   # call svmlight_format writer
-  system('java svmLight_FormatWriter train_features.txt train_features_svmLight.txt');
-  system('java svmLight_FormatWriter validate_features.txt validate_features_svmLight.txt');
+  system('java svmLight_FormatWriter rankTemp/train_features.txt rankTemp/train_features_svmLight.txt');
+  system('java svmLight_FormatWriter rankTemp/validate_features.txt rankTemp/validate_features_svmLight.txt');
 
   # create model from train part
-  system('./svm_rank_learn.exe -c 3 train_features_svmLight.txt model_rank_1_4_IMDb')
+  system('./svm_rank_learn.exe -c 3 rankTemp/train_features_svmLight.txt rankTemp/model_rank_1_4_IMDb')
   
   # predict on validate part
-  system('./svm_rank_classify.exe validate_features_svmLight.txt model_rank_1_4_IMDb validation_predicted_rank_1_4.txt')
+  system('./svm_rank_classify.exe rankTemp/validate_features_svmLight.txt rankTemp/model_rank_1_4_IMDb rankTemp/validation_predicted_rank_1_4.txt')
   
   # compare for validate part : predicted v/s actual
-  predicted_validate <- read.csv("validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
+  predicted_validate <- read.csv("rankTemp/validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
   train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
   validate_data <- train_validate_data[validate_index,]
   result_validate <- cbind(validate_data, predicted_validate)
@@ -152,28 +152,28 @@ cat("CV Avg. P@10: ", cv_value);
 
 # Final prediction on unseen test -------------------------
 #writing features in table format
-write.table(comMAT, "all_train_features.txt", sep = '\t', quote = F, row.names=F)
-write.table(test_matrix, "test_features.txt", sep = '\t', quote = F, row.names=F)
+write.table(comMAT, "rankTemp/all_train_features.txt", sep = '\t', quote = F, row.names=F)
+write.table(test_matrix, "rankTemp/test_features.txt", sep = '\t', quote = F, row.names=F)
 
 # converting to svm light format
-system('java svmLight_FormatWriter test_features.txt test_features_svmLight.txt');
-system('java svmLight_FormatWriter all_train_features.txt all_train_features_svmLight.txt');
+system('java svmLight_FormatWriter rankTemp/test_features.txt rankTemp/test_features_svmLight.txt');
+system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_train_features_svmLight.txt');
 
 # removing unused
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-#system('./svm_rank_learn.exe -c 3 all_train_features_svmLight.txt model_all_train_rank_1_4_IMDb')
-system('java -jar RankLib.jar -train all_train_features_svmLight.txt -ranker 0 -metric2t P@10 -tvs 0.8 -save RankLib_model_all_train_1_4_IMDb -test test_features_svmLight.txt')
+#system('./svm_rank_learn.exe -c 3 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
+system('java -jar RankLib.jar -train rankTemp/all_train_features_svmLight.txt -ranker 0 -metric2t P@10 -tvs 0.8 -save rankTemp/RankLib_model_all_train_1_4_IMDb -test rankTemp/test_features_svmLight.txt')
 
 # predict on test set
-#system('./svm_rank_classify.exe test_features_svmLight.txt model_rank_1_4_IMDb test_predicted_rank_1_4.txt')
-#system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
-system('./svm_rank_classify.exe test_features_svmLight.txt model_all_train_rank_1_4_IMDb test_predicted_rank_1_4.txt')
+#system('./svm_rank_classify.exe rankTemp/test_features_svmLight.txt rankTemp/model_rank_1_4_IMDb rankTemp/test_predicted_rank_1_4.txt')
+#system('./svm_rank_classify.exe rankTemp/test_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb rankTemp/test_predicted_rank_1_4.txt')
+system('./svm_rank_classify.exe rankTemp/test_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb rankTemp/test_predicted_rank_1_4.txt')
 
 # generate result file for test set
 test_file <- read.csv(TEST_DATA_FILE_NAME, sep = '\t', header = TRUE)
-predicted_test <- read.csv("test_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
+predicted_test <- read.csv("rankTemp/test_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
 result_all <- cbind(test_file, predicted_test)
 
 # writing all the sentences in test set
@@ -197,4 +197,4 @@ cat("CV Avg. P@10: ", cv_value);
 cat("TEST p@10 : ", precision_in_10);
 
 # writing result file
-write.table(top10Result, "temp_result_top10_rank_svm_test_set_clean.txt", sep='\t',row.names=F)
+write.table(top10Result, "result_top10.txt", sep='\t',row.names=F)

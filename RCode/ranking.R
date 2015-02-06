@@ -27,6 +27,7 @@ test_data <- read.csv(TEST_DATA_FILE_NAME, header = T, sep = '\t')
 test_data$count_boring <- NULL
 test_data$count_interesting <- NULL
 test_data$count_veryInteresting <- NULL
+test_data$BASE_superPOS <- NULL
 
 combined_data <- rbind(train_validate_data[,!(colnames(train_validate_data) == "Movie.Roll.Num")], test_data)
 
@@ -165,7 +166,7 @@ system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-system('./svm_rank_learn.exe -c 3 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
+system('./svm_rank_learn.exe -c 0 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
 #system('java -jar RankLib.jar -train rankTemp/all_train_features_svmLight.txt -ranker 0 -metric2t P@10 -tvs 0.8 -save rankTemp/RankLib_model_all_train_1_4_IMDb -test rankTemp/test_features_svmLight.txt')
 
 # predict on test set
@@ -206,5 +207,5 @@ featureWeights <- read.csv("rankTemp/featureWeights.txt", sep = '\t', header = F
 featureWeights$weights <- abs(as.numeric(as.character(featureWeights$V2)))
 featureWeights <- featureWeights[with(featureWeights, order(-weights)),]
 row.names(featureWeights) <- 1:nrow(featureWeights)
-cat("Total Featuires = ", nrow(featureWeights))
+cat("Total Features = ", nrow(featureWeights))
 print(subset(featureWeights, V1 %in% addedFeatures))

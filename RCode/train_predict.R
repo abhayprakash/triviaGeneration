@@ -2,7 +2,7 @@ library(tm)
 library(RTextTools)
 library(e1071)
 
-TRAIN_DATA_FILE_NAME <- "train_data.txt";
+TRAIN_DATA_FILE_NAME <- "trainData_5K_richFeatures_strict.txt";
 TEST_DATA_FILE_NAME <- "test_set_clean.txt";
 
 cross_validate_SVM_PRFA <- function(container, nfold, method = "C-classification",gamma=0.001, cross = 0, cost = 100, kernel = "radial")
@@ -85,7 +85,7 @@ test_data$count_interesting <- NULL
 test_data$count_veryInteresting <- NULL
 test_data$GRADE <- NULL
 
-combined_data <- rbind(train_validate_data, test_data)
+combined_data <- rbind(train_validate_data[,!(colnames(train_validate_data) %in% c("Movie.Roll.Num","MOVIE_NAME_IMDB"))], test_data)
 
 #name <- data[,"MOVIE_NAME_IMDB"]
 combined_trivia <- combined_data["TRIVIA"]

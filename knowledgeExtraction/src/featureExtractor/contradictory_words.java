@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class contradictory_words {
     
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\temp\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\STRICT_NEG\\";
     static String resultComp = folderPath + "INT_contradictory.txt";
     static String inputFilePath = folderPath + "trivia.txt";
     

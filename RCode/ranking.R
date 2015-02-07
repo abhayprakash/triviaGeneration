@@ -2,7 +2,7 @@ library(tm)
 library(RTextTools)
 
 TRAIN_DATA_FILE_NAME <- "train_data_5Buckets.txt";
-TEST_DATA_FILE_NAME <- "test_set_clean.txt";
+TEST_DATA_FILE_NAME <- "test_candidates_relaxed.txt";
 
 do_cross_validate <- FALSE
 
@@ -166,7 +166,7 @@ system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_
 rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-system('./svm_rank_learn.exe -c 8.5 -e 0.03 -w 3 -n 5 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
+system('./svm_rank_learn.exe -c 17 -e 0.21 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
 #system('java -jar RankLib.jar -train rankTemp/all_train_features_svmLight.txt -ranker 3 -noeq -metric2t P@10 -tvs 0.8 -save rankTemp/RankLib_model_all_train_1_4_IMDb -test rankTemp/test_features_svmLight.txt')
 #system('java -jar RankLib.jar -load rankTemp/RankLib_model_all_train_1_4_IMDb -rank rankTemp/test_features_svmLight.txt -score SCORE_RESULT.txt')
 

@@ -43,11 +43,11 @@ public class remove_missingContext {
         props.put("annotators", "tokenize,ssplit,pos,lemma,ner,parse,dcoref");
         StanfordCoreNLP pi = new StanfordCoreNLP(props);
 
-        File writeFile = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\movieTest\\good_sentences1.txt");
+        File writeFile = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\Candidate_Generation\\good_sentences_new.txt");
         writeFile.createNewFile();
         FileWriter writer = new FileWriter(writeFile); 
 
-        File writeFile2 = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\movieTest\\bad_sentences.txt");
+        File writeFile2 = new File("C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\Candidate_Generation\\bad_sentences_new.txt");
         writeFile2.createNewFile();
         FileWriter writer2 = new FileWriter(writeFile2); 
 
@@ -69,7 +69,7 @@ public class remove_missingContext {
                 
                 while((input = bufferReader.readLine()) != null)
                 {
-                    System.out.println("Line: " + input);
+                    //System.out.println("Line: " + input);
                     String sentences[] = sdetector.sentDetect(input);
                     HashMap<Integer, Integer> toRemove = new HashMap<>();
                     Annotation doc = new Annotation(input);
@@ -83,24 +83,24 @@ public class remove_missingContext {
                             continue;
                         }
                         
-                        System.out.println("Mentions: " + c.toString());
+                        //System.out.println("Mentions: " + c.toString());
                         String[] sentenceOccurence = c.toString().split(" ");
                         int firstOccurence = -1;
                         for(int i = 0; i < sentenceOccurence.length; i++)
                         {
                             if(firstOccurence == -1 && sentenceOccurence[i].equals("sentence"))
                             {
-                                System.out.println("first occurence : " + sentenceOccurence[i+1]);
+                                //System.out.println("first occurence : " + sentenceOccurence[i+1]);
                                 firstOccurence = Integer.parseInt(sentenceOccurence[i+1].replace(",", "").replace("]", ""));
                                 continue;
                             }
                             
                             if(sentenceOccurence[i].equals("sentence"))
                             {
-                                System.out.println("further occurence : "+sentenceOccurence[i+1]);
+                                //System.out.println("further occurence : "+sentenceOccurence[i+1]);
                                 if(Integer.parseInt(sentenceOccurence[i+1].replace(",", "").replace("]", "")) != firstOccurence)
                                 {
-                                    System.out.println("Added " + sentenceOccurence[i+1].replace(",", "").replace("]", "") + " for removal");
+                                    //System.out.println("Added " + sentenceOccurence[i+1].replace(",", "").replace("]", "") + " for removal");
                                     toRemove.put(Integer.parseInt(sentenceOccurence[i+1].replace(",", "").replace("]", "")), 1);
                                 }
                             }
@@ -113,15 +113,15 @@ public class remove_missingContext {
                     {
                         if(toRemove.containsKey(cand_i))
                         {
-                            System.out.println("REMOVING: " + candidate_sentence + "\n");
+                            //System.out.println("REMOVING: " + candidate_sentence + "\n");
                             writer2.write(name + "\t" + candidate_sentence + "\n");
                             continue;
                         }
-                        System.out.println("TAKING: " + candidate_sentence + "\n");
+                        //System.out.println("TAKING: " + candidate_sentence + "\n");
                         writer.write(name + "\t" + candidate_sentence + "\n");
                         cand_i++;
                     }
-                    System.in.read();
+                    //System.in.read();
                 }
                 //System.out.println("Line done");
                 bufferReader.close();

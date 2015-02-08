@@ -4,7 +4,14 @@ library(RTextTools)
 TRAIN_DATA_FILE_NAME <- "train_data_5Buckets.txt";
 TEST_DATA_FILE_NAME <- "test_candidates_relaxed.txt";
 
-do_cross_validate <- FALSE
+do_cross_validate <- TRUE
+
+ndcg <- function(x) {
+  # x is a vector of relevance scores
+  ideal_x <- rev(sort(x))
+  DCG <- function(y) y[1] + sum(y[-1]/log(2:length(y), base = 2))
+  DCG(x)/DCG(ideal_x)
+}
 
 #reading and selecting columns in train set
 train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
@@ -94,64 +101,93 @@ rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, te
 # Cross validating within known result set -----------------
 num_times = 5;
 num_validate = length(unique(train_validate_data$Movie.Roll.Num))/num_times
-indiv_p <- NULL;
-total_P_in_10 = 0;
+
+total_ndcg_5_over_all_movies_all_validation_set <- 0
+total_ndcg_10_over_all_movies_all_validation_set <- 0
+total_precision_10_all_movies_all_validation_set <- 0
+
 if(do_cross_validate)
-for(i in 1:num_times)
 {
-  # forming validate set (50 movies -> all trivia)
-  allMovies <- unique(train_validate_data$Movie.Roll.Num)
-  numMovies <- length(allMovies)
-  validateMovies_roll_num <- sample(1:numMovies, num_validate, replace = FALSE)
-  trainMovies_roll_num <- setdiff(allMovies, validateMovies_roll_num)
-  validate_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
-  train_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
-
-  # preparing container for training and validating data
-  trainMAT <- data.frame(comMAT[train_index,])
-  validateMAT <- data.frame(comMAT[validate_index,])
-
-  # writing feature matrix for train set and validate set 
-  write.table(trainMAT, "rankTemp/train_features.txt", sep = '\t', quote = F, row.names=F)
-  write.table(validateMAT, "rankTemp/validate_features.txt", sep = '\t', quote = F, row.names=F)
-
-  # call svmlight_format writer
-  system('java svmLight_FormatWriter rankTemp/train_features.txt rankTemp/train_features_svmLight.txt rankTemp/f2.txt');
-  system('java svmLight_FormatWriter rankTemp/validate_features.txt rankTemp/validate_features_svmLight.txt rankTemp/f3.txt');
-
-  # create model from train part
-  system('./svm_rank_learn.exe -c 3 rankTemp/train_features_svmLight.txt rankTemp/model_rank_1_4_IMDb')
-  
-  # predict on validate part
-  system('./svm_rank_classify.exe rankTemp/validate_features_svmLight.txt rankTemp/model_rank_1_4_IMDb rankTemp/validation_predicted_rank_1_4.txt')
-  
-  # compare for validate part : predicted v/s actual
-  predicted_validate <- read.csv("rankTemp/validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
-  train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
-  validate_data <- train_validate_data[validate_index,]
-  result_validate <- cbind(validate_data, predicted_validate)
-  
-  # metric on validation set predictions
-  sorted_result <- result_validate[order(-result_validate$V1),]
-  movie_result <- split(sorted_result, sorted_result$MOVIE)
-  
-  top10Result <- NULL
-  total_correct_in_10 <- 0
-  for(i in 1:length(movie_result))
+  for(i in 1:num_times)
   {
-    top10Result <- rbind(data.frame(top10Result), data.frame(head(movie_result[[i]], 10)))
-    thisMovie <- data.frame(head(movie_result[[i]], 10))
-    correct_in_10 <- sum(thisMovie$CLASS)
-    total_correct_in_10 <- total_correct_in_10 + correct_in_10
+    rm(allMovies, numMovies, validateMovies_roll_num, trainMovies_roll_num, validate_index, train_index, trainMAT, validateMAT, predicted_validate, validate_data, result_validate, sorted_result)
+    gc()
+    
+    # forming validate set (50 movies -> all trivia)
+    allMovies <- unique(train_validate_data$Movie.Roll.Num)
+    numMovies <- length(allMovies)
+    validateMovies_roll_num <- sample(1:numMovies, num_validate, replace = FALSE)
+    trainMovies_roll_num <- setdiff(allMovies, validateMovies_roll_num)
+    validate_index <- train_validate_data$Movie.Roll.Num %in% validateMovies_roll_num
+    train_index <- train_validate_data$Movie.Roll.Num %in% trainMovies_roll_num
+    
+    # preparing container for training and validating data
+    trainMAT <- data.frame(comMAT[train_index,])
+    validateMAT <- data.frame(comMAT[validate_index,])
+    
+    # writing feature matrix for train set and validate set 
+    write.table(trainMAT, "rankTemp/train_features.txt", sep = '\t', quote = F, row.names=F)
+    write.table(validateMAT, "rankTemp/validate_features.txt", sep = '\t', quote = F, row.names=F)
+    
+    # call svmlight_format writer
+    system('java svmLight_FormatWriter rankTemp/train_features.txt rankTemp/train_features_svmLight.txt rankTemp/f2.txt');
+    system('java svmLight_FormatWriter rankTemp/validate_features.txt rankTemp/validate_features_svmLight.txt rankTemp/f3.txt');
+    
+    # create model from train part
+    system('./svm_rank_learn.exe -c 17 -e 0.21 rankTemp/train_features_svmLight.txt rankTemp/model_rank_1_4_IMDb')
+    
+    # predict on validate part
+    system('./svm_rank_classify.exe rankTemp/validate_features_svmLight.txt rankTemp/model_rank_1_4_IMDb rankTemp/validation_predicted_rank_1_4.txt')
+    
+    # compare for validate part : predicted v/s actual
+    predicted_validate <- read.csv("rankTemp/validation_predicted_rank_1_4.txt", sep = '\t', header = FALSE)
+    train_validate_data <- read.csv(TRAIN_DATA_FILE_NAME, sep='\t', header=T)
+    validate_data <- train_validate_data[validate_index,]
+    result_validate <- cbind(validate_data, predicted_validate)
+    
+    # metric on validation set predictions
+    sorted_result <- result_validate[order(-result_validate$V1),]
+    
+    total_ndcg_5_over_all_movies <- 0
+    total_ndcg_10_over_all_movies <- 0
+    total_precision_10_all_movies <- 0
+    
+    for(mv_name in unique(sorted_result$MOVIE))
+    {
+      print(mv_name)
+      this_movie <- sorted_result[sorted_result$MOVIE_NAME_IMDB == mv_name,]
+      top_10_rank <- head(this_movie$GRADE, 10)
+      top_5_rank <- head(this_movie$GRADE, 5)
+      print(top_10_rank)
+      
+      ndcg_5_this_movie <- ndcg(top_5_rank)
+      ndcg_10_this_movie <- ndcg(top_10_rank)
+      precision_10_this_movie <- sum(head(this_movie$CLASS, 10))
+      
+      cat("This movie: ",ndcg_5_this_movie ," : " , ndcg_10_this_movie , " : ", precision_10_this_movie ,"\n" )
+      
+      total_ndcg_5_over_all_movies = total_ndcg_5_over_all_movies + ndcg_5_this_movie
+      total_ndcg_10_over_all_movies = total_ndcg_10_over_all_movies + ndcg_10_this_movie
+      total_precision_10_all_movies = total_precision_10_all_movies + precision_10_this_movie
+    }
+    
+    ndcg_5_over_all_movies <- total_ndcg_5_over_all_movies/length(unique(sorted_result$MOVIE))
+    ndcg_10_over_all_movies <- total_ndcg_10_over_all_movies/length(unique(sorted_result$MOVIE))
+    precision_10_all_movies <- total_precision_10_all_movies/length(unique(sorted_result$MOVIE))
+    
+    total_ndcg_5_over_all_movies_all_validation_set = total_ndcg_5_over_all_movies_all_validation_set + ndcg_5_over_all_movies
+    total_ndcg_10_over_all_movies_all_validation_set = total_ndcg_10_over_all_movies_all_validation_set + ndcg_10_over_all_movies
+    total_precision_10_all_movies_all_validation_set = total_precision_10_all_movies_all_validation_set + precision_10_all_movies
   }
-  precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
-  cat("p@10 : ", precision_in_10)
-  indiv_p <- c(indiv_p, precision_in_10)
-  total_P_in_10 = total_P_in_10 + precision_in_10;
+  
+  ndcg_5_over_all_movies_all_validation_set <- total_ndcg_5_over_all_movies_all_validation_set/num_times
+  ndcg_10_over_all_movies_all_validation_set <- total_ndcg_10_over_all_movies_all_validation_set/num_times
+  precision_10_all_movies_all_validation_set <- total_precision_10_all_movies_all_validation_set/num_times
+  
+  cat("CV NDCG@5: ", ndcg_5_over_all_movies_all_validation_set  ,"\n")
+  cat("CV NDCG@10: ", ndcg_10_over_all_movies_all_validation_set ,"\n")
+  cat("CV P@10: ", precision_10_all_movies_all_validation_set ,"\n")
 }
-print(indiv_p);
-cv_value <- total_P_in_10/num_times;
-cat("CV Avg. P@10: ", cv_value);
 
 # Final prediction on unseen test -------------------------
 #writing features in table format
@@ -196,8 +232,14 @@ for(i in 1:length(movie_result))
   total_correct_in_10 <- total_correct_in_10 + correct_in_10
 }
 precision_in_10 <- total_correct_in_10/length(unique(sorted_result$MOVIE))
-cat("CV Avg. P@10: ", cv_value);
 cat("TEST p@10 : ", precision_in_10);
+
+if(do_cross_validate)
+{
+  cat("CV NDCG@5: ", ndcg_5_over_all_movies_all_validation_set  ,"\n")
+  cat("CV NDCG@10: ", ndcg_10_over_all_movies_all_validation_set ,"\n")
+  cat("CV P@10: ", precision_10_all_movies_all_validation_set ,"\n")
+}
 
 # writing result file
 write.table(top10Result, "result_top10.txt", sep='\t',row.names=F)

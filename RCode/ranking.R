@@ -154,17 +154,13 @@ if(do_cross_validate)
     
     for(mv_name in unique(sorted_result$MOVIE))
     {
-      print(mv_name)
       this_movie <- sorted_result[sorted_result$MOVIE_NAME_IMDB == mv_name,]
       top_10_rank <- head(this_movie$GRADE, 10)
       top_5_rank <- head(this_movie$GRADE, 5)
-      print(top_10_rank)
       
       ndcg_5_this_movie <- ndcg(top_5_rank)
       ndcg_10_this_movie <- ndcg(top_10_rank)
       precision_10_this_movie <- sum(head(this_movie$CLASS, 10))
-      
-      cat("This movie: ",ndcg_5_this_movie ," : " , ndcg_10_this_movie , " : ", precision_10_this_movie ,"\n" )
       
       total_ndcg_5_over_all_movies = total_ndcg_5_over_all_movies + ndcg_5_this_movie
       total_ndcg_10_over_all_movies = total_ndcg_10_over_all_movies + ndcg_10_this_movie

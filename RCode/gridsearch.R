@@ -1,7 +1,7 @@
 # first generate train feature matrix, and validate feature matrix in svmlight format
 # then run the following code to get optimum values of c and e
 
-TEST_DATA_FILE_NAME <- "test_candidates_relaxed.txt";
+TRAIN_DATA_FILE_NAME <- "train_data_5Buckets.txt";
 max_n = 0;
 max_c = 1;
 max_e = 0.01;
@@ -13,7 +13,7 @@ for(c in seq(1,100,4))
 {
   for(e in seq(0.01,1,0.04))
   {
-    command <- capture.output(cat('./svm_rank_learn.exe -c ',c,' -e ',e,' rankTemp/train_features_svmLight.txt rankTemp/model_rank_1_4_IMDb')
+    command <- capture.output(cat('./svm_rank_learn.exe -c ',c,' -e ',e,' rankTemp/train_features_svmLight.txt rankTemp/model_rank_1_4_IMDb'))
     system(command)
                               
     # predict on validate part

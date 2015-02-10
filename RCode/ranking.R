@@ -4,7 +4,7 @@ library(RTextTools)
 TRAIN_DATA_FILE_NAME <- "train_data_5Buckets.txt";
 TEST_DATA_FILE_NAME <- "test_candidates_relaxed.txt";
 
-do_cross_validate <- TRUE
+do_cross_validate <- FALSE
 
 ndcg <- function(x) {
   # x is a vector of relevance scores
@@ -42,8 +42,8 @@ combined_trivia <- combined_data["TRIVIA"]
 combined_codes <- combined_data["GRADE"]
 
 # Unigram words: combined for train, validate and test
-combined_matrix <- create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, toLower = TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf)
-rm(combined_trivia)
+combined_matrix <- as.matrix(create_matrix(combined_trivia, language = "english", stripWhitespace = TRUE, removeNumbers=FALSE, stemWords=TRUE, toLower = TRUE, removePunctuation=TRUE, removeStopwords = TRUE, weighting=weightTfIdf))
+#rm(combined_trivia)
 
 # parse tree features: combined for train, validate and test
 root_matrix <- create_matrix(combined_data["ROOT_WORDS"], removePunctuation = FALSE, removeStopwords = FALSE, weighting = weightTf)
@@ -53,7 +53,7 @@ all_linked_entities_matrix <- create_matrix(combined_data["ALL_LINKABLE_ENTITIES
 parse_features_matrix <- cbind(as.matrix(all_linked_entities_matrix), as.matrix(root_matrix), as.matrix(subject_matrix), as.matrix(under_root_matrix))
 
 combined_matrix <- cbind(as.matrix(combined_matrix), as.matrix(parse_features_matrix))
-rm(parse_features_matrix, all_linked_entities_matrix, under_root_matrix, subject_matrix, root_matrix)
+#rm(parse_features_matrix, all_linked_entities_matrix, under_root_matrix, subject_matrix, root_matrix)
 
 # + frequency of superlative POS and comparative POS as features
 combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["superPOS"]))
@@ -96,7 +96,7 @@ test_codes <- combined_codes[test_start:combined_rows,]
 
 # matrix for all known result rows
 comMAT <- data.frame(cbind(train_validate_matrix, train_validate_codes))
-rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_matrix)
+#rm(combined_data, combined_codes, combined_matrix, combined_rows, test_codes, test_start, train_validate_matrix)
 
 # Cross validating within known result set -----------------
 num_times = 5;
@@ -106,13 +106,17 @@ total_ndcg_5_over_all_movies_all_validation_set <- 0
 total_ndcg_10_over_all_movies_all_validation_set <- 0
 total_precision_10_all_movies_all_validation_set <- 0
 
+n5 <- NULL
+n10 <- NULL
+p10 <- NULL
+
 if(do_cross_validate)
 {
   for(i in 1:num_times)
   {
     rm(allMovies, numMovies, validateMovies_roll_num, trainMovies_roll_num, validate_index, train_index, trainMAT, validateMAT, predicted_validate, validate_data, result_validate, sorted_result)
     gc()
-    
+
     # forming validate set (50 movies -> all trivia)
     allMovies <- unique(train_validate_data$Movie.Roll.Num)
     numMovies <- length(allMovies)
@@ -171,6 +175,10 @@ if(do_cross_validate)
     ndcg_10_over_all_movies <- total_ndcg_10_over_all_movies/length(unique(sorted_result$MOVIE))
     precision_10_all_movies <- total_precision_10_all_movies/length(unique(sorted_result$MOVIE))
     
+    n5 <- c(n5, ndcg_5_over_all_movies)
+    n10 <- c(n10, ndcg_10_over_all_movies)
+    p10 <- c(p10, precision_10_all_movies)
+    
     total_ndcg_5_over_all_movies_all_validation_set = total_ndcg_5_over_all_movies_all_validation_set + ndcg_5_over_all_movies
     total_ndcg_10_over_all_movies_all_validation_set = total_ndcg_10_over_all_movies_all_validation_set + ndcg_10_over_all_movies
     total_precision_10_all_movies_all_validation_set = total_precision_10_all_movies_all_validation_set + precision_10_all_movies
@@ -180,9 +188,23 @@ if(do_cross_validate)
   ndcg_10_over_all_movies_all_validation_set <- total_ndcg_10_over_all_movies_all_validation_set/num_times
   precision_10_all_movies_all_validation_set <- total_precision_10_all_movies_all_validation_set/num_times
   
-  cat("CV NDCG@5: ", ndcg_5_over_all_movies_all_validation_set  ,"\n")
-  cat("CV NDCG@10: ", ndcg_10_over_all_movies_all_validation_set ,"\n")
-  cat("CV P@10: ", precision_10_all_movies_all_validation_set ,"\n")
+  cat("CV NDCG@5: ", ndcg_5_over_all_movies_all_validation_set,"\n")
+  cat("CV NDCG@10: ", ndcg_10_over_all_movies_all_validation_set,"\n")
+  cat("CV P@10: ", precision_10_all_movies_all_validation_set,"\n")
+
+  cat("n5 : ")
+  print(n5)
+  cat("\n")
+  cat("n10 : ")
+  print(n10)
+  cat("\n")
+  cat("p10 : ")
+  print(p10)
+  cat("\n")
+  
+  cat(min(n5), " : ", ndcg_5_over_all_movies_all_validation_set, " : ", max(n5), "\n")
+  cat(min(n10), " : ", ndcg_10_over_all_movies_all_validation_set, " : ", max(n10), "\n")
+  cat(min(p10), " : ", precision_10_all_movies_all_validation_set, " : ", max(p10), "\n")
 }
 
 # Final prediction on unseen test -------------------------
@@ -195,7 +217,7 @@ system('java svmLight_FormatWriter rankTemp/test_features.txt rankTemp/test_feat
 system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_train_features_svmLight.txt rankTemp/featureMap.txt');
 
 # removing unused
-rm(comMAT, test_matrix, trainMAT, validateMAT)
+#rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
 system('./svm_rank_learn.exe -c 17 -e 0.21 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')

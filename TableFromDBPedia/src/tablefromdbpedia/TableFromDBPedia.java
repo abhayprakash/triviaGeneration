@@ -33,7 +33,7 @@ public class TableFromDBPedia {
     static ArrayList<String> allColumns = new ArrayList<String>();
     
     static String inputFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data_DBPedia\\Input\\";
-    static String resultTableFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data_DBPedia\\Output\\";
+    static String resultTableFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data_DBPedia\\output_temp\\";
     
     static void PrintTable(String FileName) throws IOException
     {

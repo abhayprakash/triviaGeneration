@@ -60,9 +60,9 @@ combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["superPOS"]))
 #combined_matrix <- cbind(combined_matrix, as.matrix(combined_data["compPOS"]))
 
 # + frequency of different NERs
-combined_matrix <- cbind(combined_matrix, as.matrix(combined_data[,c("MOVIE","PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG", "Contradict")]))
+combined_matrix <- cbind(combined_matrix, as.matrix(combined_data[,c("MOVIE","PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME", "FOG", "Contradict", "uniqueness")]))
 
-addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "Contradict")#, "compPOS"
+addedFeatures <- c("PERSON","ORGANIZATION","DATE","LOCATION","MONEY","TIME","superPOS", "Contradict", "uniqueness")#, "compPOS"
 
 # converting frequencies to boolean presence
 for(col in addedFeatures)
@@ -220,7 +220,7 @@ system('java svmLight_FormatWriter rankTemp/all_train_features.txt rankTemp/all_
 #rm(comMAT, test_matrix, trainMAT, validateMAT)
 
 # creating model with all available data
-system('./svm_rank_learn.exe -c 17 -e 0.21 rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
+system('./svm_rank_learn.exe rankTemp/all_train_features_svmLight.txt rankTemp/model_all_train_rank_1_4_IMDb')
 #system('java -jar RankLib.jar -train rankTemp/all_train_features_svmLight.txt -ranker 3 -noeq -metric2t P@10 -tvs 0.8 -save rankTemp/RankLib_model_all_train_1_4_IMDb -test rankTemp/test_features_svmLight.txt')
 #system('java -jar RankLib.jar -load rankTemp/RankLib_model_all_train_1_4_IMDb -rank rankTemp/test_features_svmLight.txt -score SCORE_RESULT.txt')
 

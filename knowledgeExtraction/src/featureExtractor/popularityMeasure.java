@@ -38,14 +38,14 @@ public class popularityMeasure {
     
     static HashMap<String, Double> knownScore_table = new HashMap<String, Double>();
     
-    public static void main22(String[] args) throws IOException, ParseException
+    public static void main(String[] args) throws IOException, ParseException
     {
-        String json = searchTest( "15 August", "");//&scoring=entity");
+        String json = searchTest( "Aaron Taylor-Johnson", "");//&scoring=entity");
         System.out.println(json);
         System.out.println(ParseJSON_getScore(json));
     }
     
-    public static void main(String[] args) throws IOException{
+    public static void main22(String[] args) throws IOException{
         //ReadKnownPopularityScores();
         FileWriter fw = new FileWriter(Out_resultFile);
         BufferedWriter bw = new BufferedWriter(fw);

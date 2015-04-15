@@ -32,8 +32,8 @@ public class TableFromDBPedia {
     static HashMap<String, HashMap<String, ArrayList<String> > > Table = new HashMap<String, HashMap<String, ArrayList<String>>>();
     static ArrayList<String> allColumns = new ArrayList<String>();
     
-    static String inputFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data_DBPedia\\Input\\";
-    static String resultTableFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data_DBPedia\\output_temp\\";
+    static String inputFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\Input\\";
+    static String resultTableFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\output_temp\\";
     
     static void PrintTable(String FileName) throws IOException
     {
@@ -88,7 +88,7 @@ public class TableFromDBPedia {
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
         ArrayList<String> ListOfTypeOfEntities = new ArrayList<>();
         //ListOfTypeOfEntities.add("BollywoodActresses");
-        ListOfTypeOfEntities.add("1bollywoodActresses");
+        ListOfTypeOfEntities.add("celebURLs");
         //ListOfTypeOfEntities.add("BollywoodActors");
         //ListOfTypeOfEntities.add("Actor");
         //ListOfTypeOfEntities.add("Cricketers");
@@ -224,6 +224,7 @@ public class TableFromDBPedia {
         
         Document document = builder.parse(new File(xml_FilePath));
         document.getDocumentElement().normalize();
+        
         //Element root = document.getDocumentElement();
         
         NodeList nodeList = document.getElementsByTagName("rdf:Description");

@@ -40,7 +40,7 @@ import net.didion.jwnl.data.POS;
  * @author Abhay Prakash
  */
 public class NLPFeatures {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\temp\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\";
     static String inputFilePath = folderPath + "trivia.txt";
     static String resultFile_Root = folderPath + "INT_D_rootWord.txt";
     static String resultFile_underRoot = folderPath + "INT_D_underRootWords.txt";

@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author Abhay Prakash
  */
 public class readabilityIndex {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\STRICT_NEG\\";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\temp\\";
     static String inputFilePath = "trivia.txt";
     static String resultFilePath = "fogIndex.txt";
     public static void main(String[] args) throws IOException

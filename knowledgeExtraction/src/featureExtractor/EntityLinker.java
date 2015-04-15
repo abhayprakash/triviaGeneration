@@ -23,8 +23,8 @@ import java.util.List;
  * @author Abhay Prakash
  */
 public class EntityLinker {
-    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\anotherSelected5k\\MORE_DATA\\temp\\";
-    static String In_movieID_Trivia = folderPath + "movieID_Trivia.txt";
+    static String folderPath = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\";
+    static String In_movieID_Trivia = folderPath + "id_trivia.txt";
     
     // not to change
     static String In_rootWords = folderPath + "INT_D_rootWord.txt";
@@ -79,9 +79,15 @@ public class EntityLinker {
         while((line = bufferReader.readLine()) != null)
         {
             line = line.trim();
+            System.out.println("line: " + line);
             String[] row = line.split("\t");
             row[0] = row[0].trim();
-            //System.out.println(lineNum + " : " + row.length + " : " + row[0] + row[1] + row[2]);
+            System.out.println(lineNum + " : " + row.length + " : " + row[0] + row[1] + row[2]);
+            if(row[0].startsWith("Chlo"))
+            {
+                System.out.println("see how it is in key form : ");
+                System.in.read();
+            }
             dict.putIfAbsent(row[0], new HashMap<>());
             dict.get(row[0]).putIfAbsent(row[1].trim(), new ArrayList<>());
             dict.get(row[0]).get(row[1].trim()).add(row[2].trim());
@@ -129,7 +135,7 @@ public class EntityLinker {
         String words[] = Trivia.split(" ");
         //System.out.println("Trivia: " + Trivia);
         //System.out.println("movie: " + movieID);
-        
+        System.out.println("movie id reached here : " + movieID.trim());
         for(String entity_X: dict.get(movieID.trim()).keySet())
         {//continue if found i.e. break inner for loops
             //System.out.println("entity type: " + entity_X);

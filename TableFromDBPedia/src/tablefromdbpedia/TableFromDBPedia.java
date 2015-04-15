@@ -34,6 +34,32 @@ public class TableFromDBPedia {
     
     static String inputFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\Input\\";
     static String resultTableFolder = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\output_temp\\";
+    static String resultDictionary = "C:\\Users\\Abhay Prakash\\Workspace\\trivia\\Data\\IMDb\\top1000Celebs\\Celeb_New\\dictionary.txt";
+    
+    static void PrintDictionary(String FileName) throws IOException
+    {
+        File file = new File(FileName);
+        
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile();
+
+        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        
+        for(String entityName: Table.keySet())
+        {
+            for(String entityAttribute: Table.get(entityName).keySet())
+            {
+                for(String value : Table.get(entityName).get(entityAttribute))
+                {
+                    bw.write(entityName + "\tentity_" + entityAttribute + "\t" + value +"\n");
+                }
+            }
+        }
+        bw.close();
+    }
     
     static void PrintTable(String FileName) throws IOException
     {
@@ -136,7 +162,8 @@ public class TableFromDBPedia {
             for(int i = 0; i < threads.size(); i++)
                 threads.get(i).join();
             System.out.println("***********Threads Joined******************");
-            PrintTable(type);
+            //PrintTable(type);
+            PrintDictionary(resultDictionary);
             System.out.println("DONE: " + type + "========================================");
         }
     }
@@ -216,7 +243,11 @@ public class TableFromDBPedia {
     {
         System.out.println(entityID);
         Table.putIfAbsent(entityID, new HashMap<String, ArrayList<String> >());
-        downloadFile(entityID);
+        File ff = new File(inputFolder + entityID + ".txt");
+        
+        if(!ff.exists())
+            downloadFile(entityID);
+        
         String xml_FilePath = inputFolder + entityID + ".txt";
         
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
